@@ -100,6 +100,8 @@ Replace:
 
 Do not treat the screenshots in `web_design/` as finished client portfolio assets. They are design references only.
 
+The current `mediaUrl` values use temporary seeded images from Lorem Picsum. They are only there so the layout can be reviewed with real image loading behaviour. Replace them with approved client images, approved video thumbnails, or social embed data before public launch.
+
 ## Social Feed Plan
 
 The MVP uses curated static content because it is faster, more reliable, and easier to approve with the client.

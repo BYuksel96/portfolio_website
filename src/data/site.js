@@ -29,7 +29,8 @@ export const folders = [
         date: "Placeholder",
         description: "Candid city styling, soft motion, and confident close-up framing.",
         tags: ["street", "portrait"],
-        palette: ["#f3f0e8", "#202020", "#6ea6c6"]
+        palette: ["#f3f0e8", "#202020", "#6ea6c6"],
+        mediaUrl: "https://picsum.photos/seed/photography-street/900/1200.webp"
       },
       {
         title: "Beauty Detail Frames",
@@ -37,7 +38,8 @@ export const folders = [
         date: "Placeholder",
         description: "Clean detail shots designed for brows, skin texture, and service trust.",
         tags: ["beauty", "detail"],
-        palette: ["#f8dfe8", "#6d7f5b", "#222222"]
+        palette: ["#f8dfe8", "#6d7f5b", "#222222"],
+        mediaUrl: "https://picsum.photos/seed/photography-beauty/900/1200.webp"
       },
       {
         title: "Editorial Contact Sheet",
@@ -45,7 +47,8 @@ export const folders = [
         date: "Placeholder",
         description: "A magazine-style grid mixing portraits, captions, and visual rhythm.",
         tags: ["editorial", "layout"],
-        palette: ["#ffffff", "#d01e29", "#1f5f9c"]
+        palette: ["#ffffff", "#d01e29", "#1f5f9c"],
+        mediaUrl: "https://picsum.photos/seed/photography-editorial/900/1200.webp"
       }
     ]
   },
@@ -66,7 +69,8 @@ export const folders = [
         date: "Placeholder",
         description: "Fast cuts, handheld texture, and caption-led storytelling.",
         tags: ["reel", "night"],
-        palette: ["#101010", "#d6f348", "#a62320"]
+        palette: ["#101010", "#d6f348", "#a62320"],
+        mediaUrl: "https://picsum.photos/seed/video-night-edit/900/1200.webp"
       },
       {
         title: "Behind The Shot",
@@ -74,7 +78,8 @@ export const folders = [
         date: "Placeholder",
         description: "Process-led content showing setup, detail, and the finished look.",
         tags: ["process", "editing"],
-        palette: ["#e7e3d7", "#38566d", "#111111"]
+        palette: ["#e7e3d7", "#38566d", "#111111"],
+        mediaUrl: "https://picsum.photos/seed/video-process/900/1200.webp"
       },
       {
         title: "Campaign Micro Cut",
@@ -82,7 +87,8 @@ export const folders = [
         date: "Placeholder",
         description: "A concise social-first edit prepared for vertical viewing.",
         tags: ["campaign", "vertical"],
-        palette: ["#eeeeee", "#4cc2f0", "#282828"]
+        palette: ["#eeeeee", "#4cc2f0", "#282828"],
+        mediaUrl: "https://picsum.photos/seed/video-campaign/900/1200.webp"
       }
     ]
   },
@@ -103,7 +109,8 @@ export const folders = [
         date: "Placeholder",
         description: "Movement-led content with texture, timing, and personality.",
         tags: ["freestyle", "street dance"],
-        palette: ["#e9ecef", "#111111", "#f07291"]
+        palette: ["#e9ecef", "#111111", "#f07291"],
+        mediaUrl: "https://picsum.photos/seed/dance-freestyle/900/1200.webp"
       },
       {
         title: "Choreo Notes",
@@ -111,7 +118,8 @@ export const folders = [
         date: "Placeholder",
         description: "Short sequence edits for teaching, teasing, or documenting a routine.",
         tags: ["choreography", "routine"],
-        palette: ["#f5c245", "#121212", "#5a95d6"]
+        palette: ["#f5c245", "#121212", "#5a95d6"],
+        mediaUrl: "https://picsum.photos/seed/dance-choreo/900/1200.webp"
       },
       {
         title: "Performance Archive",
@@ -119,7 +127,8 @@ export const folders = [
         date: "Placeholder",
         description: "A curated collection of live, rehearsal, and social performance moments.",
         tags: ["performance", "archive"],
-        palette: ["#342f4d", "#f6f0e6", "#d94f30"]
+        palette: ["#342f4d", "#f6f0e6", "#d94f30"],
+        mediaUrl: "https://picsum.photos/seed/dance-performance/900/1200.webp"
       }
     ]
   },
@@ -140,7 +149,8 @@ export const folders = [
         date: "Placeholder",
         description: "A trust-building service card for mapping, consultation, and aftercare.",
         tags: ["consultation", "mapping"],
-        palette: ["#fff7da", "#28231f", "#f4c84a"]
+        palette: ["#fff7da", "#28231f", "#f4c84a"],
+        mediaUrl: "https://picsum.photos/seed/brows-mapping/900/1200.webp"
       },
       {
         title: "Healed Results Placeholder",
@@ -148,7 +158,8 @@ export const folders = [
         date: "Placeholder",
         description: "Reserved for client-approved before, after, and healed result imagery.",
         tags: ["results", "aftercare"],
-        palette: ["#f4dfdc", "#7f5f56", "#111111"]
+        palette: ["#f4dfdc", "#7f5f56", "#111111"],
+        mediaUrl: "https://picsum.photos/seed/brows-results/900/1200.webp"
       },
       {
         title: "Booking Prep",
@@ -156,7 +167,8 @@ export const folders = [
         date: "Later Sprint",
         description: "Future Cal.com embed area for consultations and eyebrow tattoo bookings.",
         tags: ["booking", "future"],
-        palette: ["#ffffff", "#f4c84a", "#4b4b4b"]
+        palette: ["#ffffff", "#f4c84a", "#4b4b4b"],
+        mediaUrl: "https://picsum.photos/seed/brows-booking/900/1200.webp"
       }
     ]
   }

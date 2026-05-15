@@ -19,6 +19,8 @@ Use this file as the token-light memory layer for future Codex/Claude sessions.
 - EPIC-06 Responsive Scalability: Done. Refactored CSS with responsive folder sizing variables, adaptive gutters, auto-fit content grids, and breakpoints for mobile, tablet, laptop, and large desktop.
 - EPIC-07 Source Control Setup: Done locally. Initialized Git on `main`, configured `origin` as `https://github.com/BYuksel96/portfolio_website.git`, ignored local reference screenshots, and prepared the repo for initial push. Remote lookup failed pending GitHub access/repo availability.
 - EPIC-08 Hero UI Polish: Done. Centered desktop search on the x-axis, moved the blue Photography folder away from the title, and reduced folder label font weight.
+- EPIC-09 Folder Preview Hover: In review, not committed. Folder hover/focus now slightly opens the folder and reveals three half-exposed fanned polaroid previews from that folder's post data.
+- EPIC-10 Temporary Remote Media: In review, not committed. Added seeded Lorem Picsum `mediaUrl` values and rendered them in folder preview polaroids plus portfolio post cards for visual review.
 
 ## Future Notes
 - Replace placeholder identity, email, social URLs, and media before launch.
@@ -27,3 +29,4 @@ Use this file as the token-light memory layer for future Codex/Claude sessions.
 - Future booking default is a Cal.com embed on a dedicated eyebrow tattooing booking page.
 - Keep `package.json` overrides for `volar-service-yaml` and `yaml-language-server` until the upstream Astro checker chain no longer needs them and audit remains clean.
 - `web_design/` is ignored intentionally because it contains third-party/client-provided inspiration screenshots, not deployable site assets.
+- Current `mediaUrl` values are temporary Lorem Picsum placeholders and must be replaced with approved client media before launch.
