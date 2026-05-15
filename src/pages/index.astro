@@ -1,0 +1,171 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { folders, profile, socialNotes } from "../data/site.js";
+---
+
+<BaseLayout title={`${profile.name} | Creative Portfolio`}>
+  <main>
+    <section class="hero" aria-labelledby="page-title">
+      <div class="desktop-shell">
+        <header class="top-bar" aria-label="Portfolio status">
+          <span class="window-dots" aria-hidden="true">
+            <span></span><span></span><span></span>
+          </span>
+          <span>{profile.location}</span>
+          <span>Portfolio OS</span>
+        </header>
+
+        <div class="hero-copy">
+          <p class="eyebrow">{profile.handle}</p>
+          <h1 id="page-title">{profile.name}</h1>
+          <p>{profile.headline}</p>
+        </div>
+
+        <form class="search-panel" role="search">
+          <label class="sr-only" for="portfolio-search">Search the portfolio</label>
+          <span aria-hidden="true">⌕</span>
+          <input
+            id="portfolio-search"
+            name="q"
+            type="search"
+            placeholder="Search folders, tags, posts"
+            autocomplete="off"
+          />
+        </form>
+
+        <nav class="folder-grid" aria-label="Portfolio folders">
+          {
+            folders.map((folder) => (
+              <a
+                class={`folder folder-${folder.color}`}
+                href={`#${folder.id}`}
+                data-search-item
+                data-search-text={`${folder.label} ${folder.summary} ${folder.tags.join(" ")}`}
+              >
+                <span class="folder-icon" aria-hidden="true"></span>
+                <span>{folder.label}</span>
+              </a>
+            ))
+          }
+        </nav>
+
+        <aside class="airdrop-card" aria-label="Profile intro">
+          <strong>AirDrop</strong>
+          <p>{profile.intro}</p>
+          <a href={`mailto:${profile.email}`}>Accept</a>
+        </aside>
+      </div>
+    </section>
+
+    <section class="work-band" aria-labelledby="work-title">
+      <div class="section-inner">
+        <div class="section-heading">
+          <p class="eyebrow">Open folders</p>
+          <h2 id="work-title">Selected Work</h2>
+        </div>
+
+        <div class="folder-sections">
+          {
+            folders.map((folder) => (
+              <article class="work-folder" id={folder.id} data-folder-section>
+                <div class="folder-summary">
+                  <span class={`mini-folder folder-${folder.color}`} aria-hidden="true"></span>
+                  <div>
+                    <p class="eyebrow">{folder.socialLabel}</p>
+                    <h3>{folder.label}</h3>
+                    <p>{folder.summary}</p>
+                    <div class="tag-row" aria-label={`${folder.label} tags`}>
+                      {folder.tags.map((tag) => (
+                        <span>{tag}</span>
+                      ))}
+                    </div>
+                    <a class="text-link" href={folder.socialUrl} target="_blank" rel="noreferrer">
+                      Visit {folder.socialLabel}
+                    </a>
+                  </div>
+                </div>
+
+                <div class="post-grid">
+                  {
+                    folder.posts.map((post, index) => (
+                      <article
+                        class="post-card"
+                        data-search-item
+                        data-search-text={`${folder.label} ${post.title} ${post.type} ${post.description} ${post.tags.join(" ")}`}
+                      >
+                        <div class="poster" style={`--c1:${post.palette[0]};--c2:${post.palette[1]};--c3:${post.palette[2]};`}>
+                          <span>{String(index + 1).padStart(2, "0")}</span>
+                        </div>
+                        <div class="post-copy">
+                          <p>{post.type}</p>
+                          <h4>{post.title}</h4>
+                          <span>{post.date}</span>
+                          <p>{post.description}</p>
+                        </div>
+                      </article>
+                    ))
+                  }
+                </div>
+              </article>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    <section class="contact-band" aria-labelledby="contact-title" id="booking">
+      <div class="section-inner contact-grid">
+        <div>
+          <p class="eyebrow">Next step</p>
+          <h2 id="contact-title">Make the profile easy to book, share, and trust.</h2>
+          <p>
+            Replace the placeholder content with approved creator details, then connect selected social posts and a booking flow for eyebrow tattooing consultations.
+          </p>
+        </div>
+        <div class="contact-actions">
+          <a class="button" href={`mailto:${profile.email}`}>Email Enquiry</a>
+          <a class="button secondary" href={profile.instagram} target="_blank" rel="noreferrer">Instagram</a>
+          <a class="button secondary" href={profile.tiktok} target="_blank" rel="noreferrer">TikTok</a>
+        </div>
+        <ul class="notes-list">
+          {socialNotes.map((note) => <li>{note}</li>)}
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const input = document.querySelector("#portfolio-search");
+    const items = [...document.querySelectorAll("[data-search-item]")];
+    const sections = [...document.querySelectorAll("[data-folder-section]")];
+
+    function normalize(value: string) {
+      return value.toLowerCase().trim();
+    }
+
+    input?.addEventListener("input", (event) => {
+      const target = event.currentTarget;
+
+      if (!(target instanceof HTMLInputElement)) {
+        return;
+      }
+
+      const query = normalize(target.value);
+
+      items.forEach((item) => {
+        if (!(item instanceof HTMLElement)) {
+          return;
+        }
+
+        const text = normalize(item.dataset.searchText || "");
+        const isMatch = !query || text.includes(query);
+        item.toggleAttribute("hidden", !isMatch);
+      });
+
+      sections.forEach((section) => {
+        const visibleCards = section.querySelectorAll(".post-card:not([hidden])").length;
+        section.toggleAttribute("hidden", query.length > 0 && visibleCards === 0);
+      });
+    });
+  </script>
+</BaseLayout>

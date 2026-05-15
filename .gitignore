@@ -1,0 +1,13 @@
+node_modules/
+.DS_Store
+.vscode/
+**/dist/
+.astro/
+.vercel/
+.env
+.env.*
+!.env.example
+npm-debug.log*
+
+# Local visual references only. Do not publish third-party inspiration screenshots.
+web_design/
