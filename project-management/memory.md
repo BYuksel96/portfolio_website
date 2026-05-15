@@ -21,6 +21,7 @@ Use this file as the token-light memory layer for future Codex/Claude sessions.
 - EPIC-08 Hero UI Polish: Done. Centered desktop search on the x-axis, moved the blue Photography folder away from the title, and reduced folder label font weight.
 - EPIC-09 Folder Preview Hover: In review, not committed. Folder hover/focus now slightly opens the folder and reveals three half-exposed fanned polaroid previews from that folder's post data.
 - EPIC-10 Temporary Remote Media: In review, not committed. Added seeded Lorem Picsum `mediaUrl` values and rendered them in folder preview polaroids plus portfolio post cards for visual review.
+- EPIC-11 Search Suggestions: In review, not committed. Added Google-style suggested search prompts and a typewriter placeholder loop for the hero search input.
 
 ## Future Notes
 - Replace placeholder identity, email, social URLs, and media before launch.

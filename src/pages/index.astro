@@ -1,6 +1,15 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { folders, profile, socialNotes } from "../data/site.js";
+
+const searchSuggestions = [
+  "Photography portraits",
+  "Videography reels",
+  "Street dance clips",
+  "Eyebrow tattooing consultation",
+  "Beauty detail frames",
+  "Campaign micro cut"
+];
 ---
 
 <BaseLayout title={`${profile.name} | Creative Portfolio`}>
@@ -23,14 +32,28 @@ import { folders, profile, socialNotes } from "../data/site.js";
 
         <form class="search-panel" role="search">
           <label class="sr-only" for="portfolio-search">Search the portfolio</label>
-          <span aria-hidden="true">⌕</span>
-          <input
-            id="portfolio-search"
-            name="q"
-            type="search"
-            placeholder="Search folders, tags, posts"
-            autocomplete="off"
-          />
+          <div class="search-field-row">
+            <span aria-hidden="true">&#8981;</span>
+            <input
+              id="portfolio-search"
+              name="q"
+              type="search"
+              placeholder="Search folders, tags, posts"
+              autocomplete="off"
+              aria-controls="search-suggestions"
+              aria-expanded="false"
+            />
+          </div>
+          <div class="search-suggestions" id="search-suggestions" role="listbox" aria-label="Suggested searches">
+            {
+              searchSuggestions.map((suggestion) => (
+                <button type="button" role="option" data-suggestion={suggestion}>
+                  <span aria-hidden="true">&#8981;</span>
+                  {suggestion}
+                </button>
+              ))
+            }
+          </div>
         </form>
 
         <nav class="folder-grid" aria-label="Portfolio folders">
@@ -152,22 +175,26 @@ import { folders, profile, socialNotes } from "../data/site.js";
 
   <script>
     const input = document.querySelector("#portfolio-search");
+    const searchPanel = document.querySelector(".search-panel");
+    const suggestionButtons = [...document.querySelectorAll("[data-suggestion]")];
     const items = [...document.querySelectorAll("[data-search-item]")];
     const sections = [...document.querySelectorAll("[data-folder-section]")];
+    const placeholderPhrases = [
+      "Search folders, tags, posts",
+      "Try photography portraits",
+      "Find dance clips",
+      "Explore brow consultations",
+      "Search folders, tags, posts"
+    ];
+    let phraseIndex = 0;
+    let characterIndex = 0;
+    let isDeleting = false;
 
     function normalize(value: string) {
       return value.toLowerCase().trim();
     }
 
-    input?.addEventListener("input", (event) => {
-      const target = event.currentTarget;
-
-      if (!(target instanceof HTMLInputElement)) {
-        return;
-      }
-
-      const query = normalize(target.value);
-
+    function filterPortfolio(query: string) {
       items.forEach((item) => {
         if (!(item instanceof HTMLElement)) {
           return;
@@ -182,6 +209,81 @@ import { folders, profile, socialNotes } from "../data/site.js";
         const visibleCards = section.querySelectorAll(".post-card:not([hidden])").length;
         section.toggleAttribute("hidden", query.length > 0 && visibleCards === 0);
       });
+    }
+
+    function syncSearchState() {
+      if (!(input instanceof HTMLInputElement)) {
+        return;
+      }
+
+      const hasValue = input.value.trim().length > 0;
+      const isFocused = document.activeElement === input;
+      searchPanel?.classList.toggle("has-value", hasValue);
+      input.setAttribute("aria-expanded", String(isFocused || hasValue));
+    }
+
+    function tickPlaceholder() {
+      if (!(input instanceof HTMLInputElement)) {
+        return;
+      }
+
+      if (input.value.length > 0) {
+        window.setTimeout(tickPlaceholder, 700);
+        return;
+      }
+
+      const phrase = placeholderPhrases[phraseIndex];
+      const nextLength = isDeleting ? characterIndex - 1 : characterIndex + 1;
+      characterIndex = Math.max(0, Math.min(phrase.length, nextLength));
+      input.placeholder = phrase.slice(0, characterIndex);
+
+      if (!isDeleting && characterIndex === phrase.length) {
+        isDeleting = true;
+        window.setTimeout(tickPlaceholder, 1100);
+        return;
+      }
+
+      if (isDeleting && characterIndex === 0) {
+        isDeleting = false;
+        phraseIndex = (phraseIndex + 1) % placeholderPhrases.length;
+        window.setTimeout(tickPlaceholder, 280);
+        return;
+      }
+
+      window.setTimeout(tickPlaceholder, isDeleting ? 34 : 56);
+    }
+
+    input?.addEventListener("input", (event) => {
+      const target = event.currentTarget;
+
+      if (!(target instanceof HTMLInputElement)) {
+        return;
+      }
+
+      filterPortfolio(normalize(target.value));
+      syncSearchState();
     });
+
+    input?.addEventListener("focus", syncSearchState);
+    input?.addEventListener("blur", () => window.setTimeout(syncSearchState, 120));
+
+    suggestionButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        if (!(button instanceof HTMLElement) || !(input instanceof HTMLInputElement)) {
+          return;
+        }
+
+        input.value = button.dataset.suggestion || "";
+        filterPortfolio(normalize(input.value));
+        syncSearchState();
+        input.focus();
+      });
+    });
+
+    searchPanel?.addEventListener("submit", (event) => {
+      event.preventDefault();
+    });
+
+    tickPlaceholder();
   </script>
 </BaseLayout>
