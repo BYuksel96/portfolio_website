@@ -18,6 +18,7 @@ Use this file as the token-light memory layer for future Codex/Claude sessions.
 - EPIC-05 Security Hardening: Done. Upgraded Astro to 6.3.3, updated @astrojs/check to 0.9.9, added npm overrides for patched YAML tooling, and verified `npm.cmd audit`, `check`, and `build` all pass.
 - EPIC-06 Responsive Scalability: Done. Refactored CSS with responsive folder sizing variables, adaptive gutters, auto-fit content grids, and breakpoints for mobile, tablet, laptop, and large desktop.
 - EPIC-07 Source Control Setup: Done locally. Initialized Git on `main`, configured `origin` as `https://github.com/BYuksel96/portfolio_website.git`, ignored local reference screenshots, and prepared the repo for initial push. Remote lookup failed pending GitHub access/repo availability.
+- EPIC-08 Hero UI Polish: Done. Centered desktop search on the x-axis, moved the blue Photography folder away from the title, and reduced folder label font weight.
 
 ## Future Notes
 - Replace placeholder identity, email, social URLs, and media before launch.
