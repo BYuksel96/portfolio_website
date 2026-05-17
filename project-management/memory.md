@@ -24,6 +24,7 @@ Use this file as the token-light memory layer for future Codex/Claude sessions.
 - EPIC-11 Search Suggestions: In review, not committed. Added Google-style suggested search prompts and a typewriter placeholder loop for the hero search input.
 - EPIC-12 Work Folder Heading Alignment: In review, not committed. Removed work-section social eyebrow labels and aligned each main folder heading vertically to the center of its folder icon.
 - EPIC-13 Single-Line Work Headings: In review, not committed. Work-folder headings now prefer a one-line layout with responsive font sizing and mobile fallback wrapping.
+- EPIC-14 Hero Split-Flap Landscape Board: In review, not committed. Generated five temporary hyper-realistic landscape images and added a 24-column split-flap hero background that flips left-to-right, waits 5 seconds after completion, then cycles to the next image.
 
 ## Future Notes
 - Replace placeholder identity, email, social URLs, and media before launch.
@@ -33,3 +34,4 @@ Use this file as the token-light memory layer for future Codex/Claude sessions.
 - Keep `package.json` overrides for `volar-service-yaml` and `yaml-language-server` until the upstream Astro checker chain no longer needs them and audit remains clean.
 - `web_design/` is ignored intentionally because it contains third-party/client-provided inspiration screenshots, not deployable site assets.
 - Current `mediaUrl` values are temporary Lorem Picsum placeholders and must be replaced with approved client media before launch.
+- Hero split-flap landscapes live in `public/assets/landscapes/` and are temporary AI-generated review assets.
