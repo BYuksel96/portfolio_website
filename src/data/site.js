@@ -11,6 +11,29 @@ export const profile = {
   booking: "#booking"
 };
 
+export const heroLandscapes = [
+  {
+    src: "/assets/landscapes/mountain-valley.webp",
+    alt: "Misty mountain valley at sunrise"
+  },
+  {
+    src: "/assets/landscapes/black-sand-coast.webp",
+    alt: "Black-sand coastline at blue hour"
+  },
+  {
+    src: "/assets/landscapes/desert-canyon.webp",
+    alt: "Desert canyon after rain"
+  },
+  {
+    src: "/assets/landscapes/rainforest-waterfall.webp",
+    alt: "Rainforest waterfall and emerald pool"
+  },
+  {
+    src: "/assets/landscapes/arctic-aurora.webp",
+    alt: "Frozen arctic lake under aurora lights"
+  }
+];
+
 export const folders = [
   {
     id: "photography",

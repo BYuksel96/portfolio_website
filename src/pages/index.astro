@@ -1,6 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { folders, profile, socialNotes } from "../data/site.js";
+import { folders, heroLandscapes, profile, socialNotes } from "../data/site.js";
 
 const searchSuggestions = [
   "Photography portraits",
@@ -15,7 +15,20 @@ const searchSuggestions = [
 <BaseLayout title={`${profile.name} | Creative Portfolio`}>
   <main>
     <section class="hero" aria-labelledby="page-title">
-      <div class="desktop-shell">
+      <div class="desktop-shell" data-landscapes={JSON.stringify(heroLandscapes.map((image) => image.src))}>
+        <div class="split-flap-board" aria-hidden="true">
+          {
+            Array.from({ length: 24 }).map((_, index) => (
+              <span class="split-flap-tile" style={`--tile-index:${index};--tile-count:24;`}>
+                <span class="split-flap-card">
+                  <span class="split-flap-face split-flap-face-front"></span>
+                  <span class="split-flap-face split-flap-face-back"></span>
+                </span>
+              </span>
+            ))
+          }
+        </div>
+
         <header class="top-bar" aria-label="Portfolio status">
           <span class="window-dots" aria-hidden="true">
             <span></span><span></span><span></span>
@@ -176,6 +189,8 @@ const searchSuggestions = [
     const input = document.querySelector("#portfolio-search");
     const searchPanel = document.querySelector(".search-panel");
     const suggestionButtons = [...document.querySelectorAll("[data-suggestion]")];
+    const desktopShell = document.querySelector(".desktop-shell");
+    const splitFlapTiles = [...document.querySelectorAll(".split-flap-tile")];
     const items = [...document.querySelectorAll("[data-search-item]")];
     const sections = [...document.querySelectorAll("[data-folder-section]")];
     const placeholderPhrases = [
@@ -191,6 +206,90 @@ const searchSuggestions = [
 
     function normalize(value: string) {
       return value.toLowerCase().trim();
+    }
+
+    function getLandscapeSources() {
+      if (!(desktopShell instanceof HTMLElement)) {
+        return [];
+      }
+
+      try {
+        const sources = JSON.parse(desktopShell.dataset.landscapes || "[]");
+        return Array.isArray(sources) ? sources.filter((source) => typeof source === "string") : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function setTileFace(tile: Element, selector: string, source: string, index: number, total: number) {
+      if (!(tile instanceof HTMLElement)) {
+        return;
+      }
+
+      const face = tile.querySelector(selector);
+
+      if (!(face instanceof HTMLElement)) {
+        return;
+      }
+
+      face.style.backgroundImage = `url("${source}")`;
+      face.style.backgroundSize = `${total * 100}% 100%`;
+      face.style.backgroundPosition = `${total <= 1 ? 0 : (index / (total - 1)) * 100}% center`;
+    }
+
+    function resetTileToFront(tile: HTMLElement) {
+      tile.classList.add("is-resetting");
+      tile.classList.remove("is-flipping");
+
+      window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(() => {
+          tile.classList.remove("is-resetting");
+        });
+      });
+    }
+
+    function initSplitFlapBoard() {
+      const sources = getLandscapeSources();
+
+      if (sources.length < 2 || splitFlapTiles.length === 0) {
+        return;
+      }
+
+      let imageIndex = 0;
+      const tileDelay = 80;
+      const flipDuration = 760;
+      const pauseAfterComplete = 5000;
+
+      splitFlapTiles.forEach((tile, index) => {
+        setTileFace(tile, ".split-flap-face-front", sources[imageIndex], index, splitFlapTiles.length);
+        setTileFace(tile, ".split-flap-face-back", sources[(imageIndex + 1) % sources.length], index, splitFlapTiles.length);
+      });
+
+      function flipToNextImage() {
+        const nextImageIndex = (imageIndex + 1) % sources.length;
+
+        splitFlapTiles.forEach((tile, index) => {
+          window.setTimeout(() => {
+            if (!(tile instanceof HTMLElement)) {
+              return;
+            }
+
+            setTileFace(tile, ".split-flap-face-back", sources[nextImageIndex], index, splitFlapTiles.length);
+            tile.classList.add("is-flipping");
+
+            window.setTimeout(() => {
+              setTileFace(tile, ".split-flap-face-front", sources[nextImageIndex], index, splitFlapTiles.length);
+              resetTileToFront(tile);
+            }, flipDuration);
+          }, index * tileDelay);
+        });
+
+        imageIndex = nextImageIndex;
+        const fullSweepDuration = (splitFlapTiles.length - 1) * tileDelay + flipDuration;
+        window.setTimeout(flipToNextImage, fullSweepDuration + pauseAfterComplete);
+      }
+
+      window.setTimeout(flipToNextImage, pauseAfterComplete);
     }
 
     function filterPortfolio(query: string) {
@@ -284,5 +383,6 @@ const searchSuggestions = [
     });
 
     tickPlaceholder();
+    initSplitFlapBoard();
   </script>
 </BaseLayout>
