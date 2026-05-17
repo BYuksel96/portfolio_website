@@ -543,10 +543,20 @@ h2 {
 h3 {
   margin: 0;
   font-size: 2.35rem;
+  line-height: 1;
   letter-spacing: 0;
 }
 
-.folder-summary p:not(.eyebrow),
+.folder-summary h3 {
+  display: flex;
+  align-items: center;
+  min-height: calc(var(--mini-folder-width) * 0.74);
+  max-width: min(100%, 14ch);
+  font-size: clamp(1.55rem, 4.6vw, 2.35rem);
+  white-space: nowrap;
+}
+
+.folder-summary p,
 .contact-grid p {
   color: var(--muted);
   line-height: 1.55;
@@ -844,6 +854,12 @@ h4 {
 
   .folder-summary {
     display: grid;
+  }
+
+  .folder-summary h3 {
+    min-height: 0;
+    max-width: 100%;
+    white-space: normal;
   }
 }
 
