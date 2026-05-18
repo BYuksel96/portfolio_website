@@ -103,11 +103,19 @@ const searchSuggestions = [
           }
         </nav>
 
-        <aside class="airdrop-card" aria-label="Profile intro">
+        <aside class="airdrop-card" id="airdrop-card" aria-label="Profile intro">
+          <button class="airdrop-minimise" type="button" aria-label="Minimise AirDrop" data-airdrop-minimise>
+            <span aria-hidden="true">-</span>
+          </button>
           <strong>AirDrop</strong>
           <p>{profile.intro}</p>
           <a href={`mailto:${profile.email}`}>Accept</a>
         </aside>
+
+        <button class="airdrop-toast" type="button" aria-controls="airdrop-card" aria-expanded="false" data-airdrop-toast>
+          <span class="airdrop-toast-dot" aria-hidden="true"></span>
+          <span>Incoming AirDrop</span>
+        </button>
       </div>
     </section>
 
@@ -196,6 +204,10 @@ const searchSuggestions = [
     const splitFlapTiles = [...document.querySelectorAll(".split-flap-tile")];
     const items = [...document.querySelectorAll("[data-search-item]")];
     const sections = [...document.querySelectorAll("[data-folder-section]")];
+    const airdropCard = document.querySelector("#airdrop-card");
+    const airdropToast = document.querySelector("[data-airdrop-toast]");
+    const airdropMinimise = document.querySelector("[data-airdrop-minimise]");
+    const mobileAirdropQuery = window.matchMedia("(max-width: 580px)");
     const placeholderPhrases = [
       "Search folders, tags, posts",
       "Try photography portraits",
@@ -385,6 +397,27 @@ const searchSuggestions = [
       event.preventDefault();
     });
 
+    let isAirdropExpanded = false;
+
+    function syncAirdropAccessibility() {
+      const isMobileAirdrop = mobileAirdropQuery.matches;
+      const isHiddenMobileCard = isMobileAirdrop && !isAirdropExpanded;
+      airdropCard?.toggleAttribute("inert", isHiddenMobileCard);
+      airdropCard?.setAttribute("aria-hidden", String(isHiddenMobileCard));
+    }
+
+    function setAirdropExpanded(expanded: boolean) {
+      isAirdropExpanded = expanded;
+      airdropCard?.classList.toggle("is-open", expanded);
+      airdropToast?.setAttribute("aria-expanded", String(expanded));
+      syncAirdropAccessibility();
+    }
+
+    airdropToast?.addEventListener("click", () => setAirdropExpanded(true));
+    airdropMinimise?.addEventListener("click", () => setAirdropExpanded(false));
+    mobileAirdropQuery.addEventListener("change", syncAirdropAccessibility);
+
+    syncAirdropAccessibility();
     tickPlaceholder();
     initSplitFlapBoard();
   </script>
