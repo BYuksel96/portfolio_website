@@ -79,20 +79,23 @@ const searchSuggestions = [
                 data-search-text={`${folder.label} ${folder.summary} ${folder.tags.join(" ")}`}
               >
                 <span class="folder-stack" aria-hidden="true">
-                  <span class="folder-previews">
-                    {
-                      folder.posts.slice(0, 3).map((post, index) => (
-                        <span
-                          class={`folder-polaroid preview-${index + 1}`}
-                          style={`--c1:${post.palette[0]};--c2:${post.palette[1]};--c3:${post.palette[2]};`}
-                        >
-                          <img class="polaroid-media" src={post.mediaUrl} alt="" loading="lazy" />
-                          <span class="polaroid-strip"></span>
-                        </span>
-                      ))
-                    }
+                  <span class="folder-icon">
+                    <span class="folder-back"></span>
+                    <span class="folder-previews">
+                      {
+                        folder.posts.slice(0, 3).map((post, index) => (
+                          <span
+                            class={`folder-polaroid preview-${index + 1}`}
+                            style={`--c1:${post.palette[0]};--c2:${post.palette[1]};--c3:${post.palette[2]};`}
+                          >
+                            <img class="polaroid-media" src={post.mediaUrl} alt="" loading="lazy" />
+                            <span class="polaroid-strip"></span>
+                          </span>
+                        ))
+                      }
+                    </span>
+                    <span class="folder-front"></span>
                   </span>
-                  <span class="folder-icon"></span>
                 </span>
                 <span>{folder.label}</span>
               </a>
