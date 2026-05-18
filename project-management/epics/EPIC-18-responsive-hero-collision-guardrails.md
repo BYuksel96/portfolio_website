@@ -46,12 +46,20 @@ Given the viewport is mobile width,
 When I view the folders,  
 Then folders use a two-column grid and do not overlap the title, search, or AirDrop notification.
 
+Given the viewport is a tall mobile screen,  
+When I view the hero after the search bar,  
+Then the folder grid sits higher between the search bar and bottom shell edge instead of collecting near the bottom.
+
+Given the viewport is mobile height,  
+When the desktop shell renders,  
+Then the shell keeps the same outer gutter at the bottom of the screen as it has at the top.
+
 Given the viewport is mobile width,  
 When I use search,  
 Then the search bar remains centered and sized to the available width.
 
 #### Test Notes
-Refined mobile folder sizing, shell padding, title sizing, hero copy inset/alignment, and search panel centering in `src/styles/global.css`. Cleared inherited desktop offsets when foreground elements switch to relative positioning so mobile alignment rules actually apply.
+Refined mobile folder sizing, shell min-height/padding, title sizing, hero copy inset/alignment, search panel centering, and mobile folder grid vertical placement in `src/styles/global.css`. Cleared inherited desktop offsets when foreground elements switch to relative positioning so mobile alignment rules actually apply.
 
 ### Story: Mobile Hero Content Layering
 As a mobile visitor,  

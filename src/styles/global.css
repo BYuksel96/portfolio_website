@@ -968,7 +968,7 @@ h4 {
     left: auto;
     right: auto;
     width: min(460px, 100%);
-    margin: 28px auto;
+    margin: 28px auto 18px;
     transform: none;
   }
 
@@ -1037,6 +1037,7 @@ h4 {
   }
 
   .desktop-shell {
+    min-height: calc(100svh - (var(--page-gutter) * 2));
     padding: 18px 14px 42px;
     border-radius: 20px;
   }
@@ -1068,7 +1069,7 @@ h4 {
   .folder-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 24px 10px;
-    margin-top: 8px;
+    margin-top: clamp(-124px, -13vh, -72px);
   }
 
   .airdrop-card {
