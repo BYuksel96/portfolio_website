@@ -14,6 +14,7 @@
 - Tuned the mobile hero block down slightly after review while preserving its internal spacing.
 - Raised the mobile folder grid so it sits closer to the midpoint between the search bar and shell bottom on tall phone screens.
 - Set the mobile desktop shell to fill the viewport minus equal page gutters so the top and bottom outer gaps match.
+- Added short-phone compression rules for iPhone SE-style heights so the shell stays inside the viewport without needing scroll.
 - Restored mobile foreground stacking so hero copy, search, folders, and AirDrop sit above the split-flap slice overlay, with inherited desktop offsets cleared at the mobile flow breakpoint.
 
 ## Stories Completed

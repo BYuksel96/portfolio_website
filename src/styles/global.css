@@ -1037,7 +1037,8 @@ h4 {
   }
 
   .desktop-shell {
-    min-height: calc(100svh - (var(--page-gutter) * 2));
+    height: calc(100svh - (var(--page-gutter) * 2));
+    min-height: 0;
     padding: 18px 14px 42px;
     border-radius: 20px;
   }
@@ -1192,6 +1193,56 @@ h4 {
     min-height: 0;
     max-width: 100%;
     white-space: normal;
+  }
+}
+
+@media (max-width: 580px) and (max-height: 740px) {
+  :root {
+    --folder-width: min(38vw, 116px);
+    --folder-icon-width: min(27vw, 88px);
+    --folder-label-size: 0.78rem;
+  }
+
+  .desktop-shell {
+    padding: 14px 14px 30px;
+  }
+
+  .hero-copy {
+    padding-top: 34px;
+  }
+
+  .eyebrow {
+    margin-bottom: 7px;
+    font-size: 0.68rem;
+  }
+
+  h1 {
+    font-size: clamp(2.7rem, 14vw, 3.45rem);
+  }
+
+  .hero-copy p:last-child {
+    max-width: 300px;
+    margin-top: 12px;
+    font-size: 0.9rem;
+    line-height: 1.35;
+  }
+
+  .search-panel {
+    margin: 20px auto 10px;
+  }
+
+  .search-field-row {
+    min-height: 48px;
+  }
+
+  .folder-grid {
+    gap: 18px 8px;
+    margin-top: clamp(-150px, -18vh, -96px);
+  }
+
+  .airdrop-card,
+  .airdrop-toast {
+    top: 48px;
   }
 }
 
