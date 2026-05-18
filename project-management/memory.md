@@ -25,6 +25,8 @@ Use this file as the token-light memory layer for future Codex/Claude sessions.
 - EPIC-12 Work Folder Heading Alignment: In review, not committed. Removed work-section social eyebrow labels and aligned each main folder heading vertically to the center of its folder icon.
 - EPIC-13 Single-Line Work Headings: In review, not committed. Work-folder headings now prefer a one-line layout with responsive font sizing and mobile fallback wrapping.
 - EPIC-14 Hero Split-Flap Landscape Board: In review, not committed. Generated five temporary hyper-realistic landscape images and added a 24-column split-flap hero background that sweeps left-to-right; each tile is now a two-sided 180-degree flip card with the current image on the front and next image on the back, waits 5 seconds after completion, then cycles.
+- EPIC-15 Folder Preview Mouth Anchor: In review, not committed. Folder hover polaroids now sit between the folder back/body and the front flap overlay, with smaller cards and lower travel so the previews fan out from the folder mouth.
+- EPIC-16 Folder Face Split Polish: In review, not committed. Folder front face keeps the original colour while tab/back pieces share the exact same 20% lighter colour; tab is smaller than the original but tuned wider and ~3px taller, with one higher split line where the front flap opens and previews emerge.
 
 ## Future Notes
 - Replace placeholder identity, email, social URLs, and media before launch.
