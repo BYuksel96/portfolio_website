@@ -4,6 +4,7 @@
 - Re-layered the folder so preview cards sit behind the front flap but in front of the folder body.
 - Adjusted the front flap overlay to cover the lower portion of the preview cards.
 - Scaled the preview cards down and reduced their hover travel so they read as emerging from the folder mouth.
+- Moved the resting preview transform upward so cards retract without clipping below the folder body on hover-out.
 - Preserved the existing fanned hover and keyboard focus behaviour.
 
 ## Stories Completed

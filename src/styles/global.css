@@ -395,7 +395,7 @@ h1 {
   background: rgba(255, 255, 255, 0.96);
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.16);
   opacity: 0;
-  transform: translate(-50%, 18%) rotate(var(--rest-rotate)) scale(0.68);
+  transform: translate(-50%, -4%) rotate(var(--rest-rotate)) scale(0.62);
   transform-origin: 50% 95%;
   transition:
     opacity 180ms ease,
