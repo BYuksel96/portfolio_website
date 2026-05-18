@@ -10,12 +10,16 @@
 - Compacted tablet AirDrop sizing and spacing.
 - Added narrow desktop and low-height desktop hero rules to reduce title/folder/AirDrop collisions.
 - Tightened mobile folder sizing, hero title sizing, and search centering.
+- Raised the mobile creator handle/title/headline block and aligned its left inset with the AirDrop notification's right inset.
+- Tuned the mobile hero block down slightly after review while preserving its internal spacing.
+- Restored mobile foreground stacking so hero copy, search, folders, and AirDrop sit above the split-flap slice overlay, with inherited desktop offsets cleared at the mobile flow breakpoint.
 
 ## Stories Completed
 - Compact AirDrop Card
 - Mobile AirDrop Notification
 - Narrow Desktop Folder Repositioning
 - Mobile Hero Flow
+- Mobile Hero Content Layering
 
 ## Test Evidence
 - `npm.cmd audit` passed with 0 vulnerabilities.

@@ -28,7 +28,7 @@ Use this file as the token-light memory layer for future Codex/Claude sessions.
 - EPIC-15 Folder Preview Mouth Anchor: In review, not committed. Folder hover polaroids sit between the folder back/body and front flap, fan out from the folder mouth, and retract upward inside the folder without clipping below the body.
 - EPIC-16 Folder Face Split Polish: In review, not committed. Folder front face keeps the original colour while tab/back pieces share the exact same 20% lighter colour; tab is smaller than the original but tuned wider and ~3px taller, with one higher split line where the front flap opens and previews emerge.
 - EPIC-17 Responsive AirDrop: In review, not committed. AirDrop compacts on tablet-style layouts and becomes a mobile-only top-right notification aligned near the creator handle, with a solid blue dot and two pulsing blue glow layers, expanding into a correctly sized card with a yellow minimise button.
-- EPIC-18 Responsive Hero Collision Guardrails: In review, not committed. Added narrow desktop, low-height desktop, tablet, and mobile layout rules to keep folders away from the creator title, search, and AirDrop UI.
+- EPIC-18 Responsive Hero Collision Guardrails: In review, not committed. Added narrow desktop, low-height desktop, tablet, and mobile layout rules to keep folders away from creator title/search/AirDrop UI, restored mobile foreground stacking with desktop offsets cleared, and tuned mobile hero copy inset/height against the AirDrop notification.
 
 ## Future Notes
 - Replace placeholder identity, email, social URLs, and media before launch.

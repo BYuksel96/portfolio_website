@@ -39,6 +39,10 @@ When I view the homepage,
 Then the creator title scales down and remains readable near the top.
 
 Given the viewport is mobile width,  
+When I compare the creator handle and AirDrop notification,  
+Then the creator handle row is raised to align with the notification centreline and uses the same inner-shell inset from the left as the notification uses from the right.
+
+Given the viewport is mobile width,  
 When I view the folders,  
 Then folders use a two-column grid and do not overlap the title, search, or AirDrop notification.
 
@@ -47,7 +51,24 @@ When I use search,
 Then the search bar remains centered and sized to the available width.
 
 #### Test Notes
-Refined mobile folder sizing, shell padding, title sizing, and search panel centering in `src/styles/global.css`.
+Refined mobile folder sizing, shell padding, title sizing, hero copy inset/alignment, and search panel centering in `src/styles/global.css`. Cleared inherited desktop offsets when foreground elements switch to relative positioning so mobile alignment rules actually apply.
+
+### Story: Mobile Hero Content Layering
+As a mobile visitor,  
+I want the creator text and search bar to sit above the split-flap slices,  
+So that the vertical board lines do not wash over the foreground UI.
+
+#### Acceptance Criteria
+Given the viewport is below tablet width,  
+When the hero switches into flow layout,  
+Then the creator handle, title, headline, search, folders, and AirDrop card remain layered above the split-flap board.
+
+Given the search bar is visible on mobile,  
+When I view it over the split-flap background,  
+Then the vertical slice overlay does not appear on top of the search field.
+
+#### Test Notes
+Kept the responsive flow layout while restoring active stacking contexts in `src/styles/global.css` by setting foreground hero elements to `position: relative` with higher `z-index` values and clearing inherited desktop `inset` offsets.
 
 ## Sprint Review Summary
-Hero layout now has stronger responsive guardrails for narrow desktop, low-height desktop, tablet, and mobile layouts so folders avoid the title and AirDrop UI.
+Hero layout now has stronger responsive guardrails for narrow desktop, low-height desktop, tablet, and mobile layouts so folders avoid the title/AirDrop UI and foreground content stays above the split-flap overlay.

@@ -944,6 +944,20 @@ h4 {
   .top-bar {
     position: absolute;
     inset: 0 0 auto;
+    z-index: 8;
+  }
+
+  .hero-copy,
+  .search-panel,
+  .folder-grid,
+  .airdrop-card {
+    position: relative;
+    inset: auto;
+    z-index: 5;
+  }
+
+  .search-panel {
+    z-index: 7;
   }
 
   .hero-copy {
@@ -1023,12 +1037,14 @@ h4 {
   }
 
   .desktop-shell {
-    padding: 62px 14px 42px;
+    padding: 18px 14px 42px;
     border-radius: 20px;
   }
 
   .hero-copy {
-    max-width: 92%;
+    max-width: calc(100% - 28px);
+    margin-left: -2px;
+    padding-top: 42px;
   }
 
   .hero-copy p:last-child {
