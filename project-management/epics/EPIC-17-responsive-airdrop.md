@@ -38,7 +38,7 @@ Then I see a compact "Incoming AirDrop" notification aligned near the creator ha
 
 Given the mobile AirDrop notification is visible,  
 When I watch the blue indicator,  
-Then the centre dot stays solid, the lighter middle ring appears, the pale outer ring appears after it, and both rings disappear before the cycle repeats.
+Then the solid centre dot remains visible while the lighter middle and outer blue glow layers pulse around it before the cycle repeats.
 
 Given I tap the notification,  
 When the AirDrop card opens,  
@@ -54,4 +54,4 @@ Verify minimised mobile AirDrop content is not keyboard-focusable while hidden.
 Added mobile-only AirDrop toast/open/minimise controls in `src/pages/index.astro`, plus top-right shell positioning, morph-style scale animation, layered indicator ring animation, and accessibility state sync in `src/styles/global.css`.
 
 ## Sprint Review Summary
-AirDrop now behaves responsively: compact in tablet-style layouts, and mobile-only as a polished top-right notification with a three-layer pulsing indicator that expands from the same position into the card and can be minimised again.
+AirDrop now behaves responsively: compact in tablet-style layouts, and mobile-only as a polished top-right notification with a solid blue dot and two pulsing glow layers that expands from the same position into the card.

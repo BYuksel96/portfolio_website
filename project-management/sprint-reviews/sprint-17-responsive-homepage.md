@@ -4,7 +4,7 @@
 - Added a mobile-only top-right AirDrop notification aligned near the creator handle.
 - Changed the mobile AirDrop open animation so the card expands from the notification position.
 - Fixed the mobile AirDrop card stretch by unsetting the inherited desktop bottom position.
-- Replaced the notification dot shadow with a three-layer blue indicator: solid centre, lighter middle ring, and pale outer ring with sequential pulsing.
+- Reverted the notification indicator to the first pulse treatment: solid blue centre dot with two pulsing blue glow layers around it.
 - Added a yellow minimise button on the mobile AirDrop card.
 - Prevented hidden mobile AirDrop card content from remaining keyboard-focusable while minimised.
 - Compacted tablet AirDrop sizing and spacing.

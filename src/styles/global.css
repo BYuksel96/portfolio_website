@@ -651,8 +651,19 @@ h1 {
   background: #f4c84a;
   color: #4f3900;
   font-weight: 900;
+  font-size: 0.78rem;
   line-height: 1;
   cursor: pointer;
+}
+
+.airdrop-minimise span {
+  display: block;
+  width: 5px;
+  height: 2px;
+  border-radius: 999px;
+  background: currentColor;
+  font-size: 0;
+  line-height: 0;
 }
 
 .work-band,
@@ -1046,7 +1057,7 @@ h4 {
 
   .airdrop-card {
     position: absolute;
-    top: 58px;
+    top: 52px;
     right: 12px;
     bottom: auto;
     z-index: 12;
@@ -1070,6 +1081,10 @@ h4 {
 
   .airdrop-minimise {
     display: flex;
+    top: 8px;
+    left: 10px;
+    width: 16px;
+    height: 16px;
   }
 
   .airdrop-card strong {
@@ -1078,7 +1093,7 @@ h4 {
 
   .airdrop-toast {
     position: absolute;
-    top: 58px;
+    top: 52px;
     right: 12px;
     z-index: 11;
     display: inline-flex;
@@ -1094,7 +1109,7 @@ h4 {
       rgba(255, 255, 255, 0.86);
     color: #151515;
     font-size: 0.76rem;
-    font-weight: 850;
+    font-weight: 500;
     line-height: 1.1;
     text-align: left;
     box-shadow:
