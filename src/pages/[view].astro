@@ -2,7 +2,12 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import PortfolioMonitor from "../components/PortfolioMonitor.astro";
 import { portfolioContacts } from "../lib/portfolio-catalog.js";
+export function getStaticPaths() {
+  return ["eyebrow-tattooing", "videography", "photography", "dance", "search", "contacts"]
+    .map((view) => ({ params: { view }, props: { view } }));
+}
+const { view } = Astro.props;
 ---
 <BaseLayout title={`${portfolioContacts.name} | Creative Portfolio`}>
-  <PortfolioMonitor initialView="home" />
+  <PortfolioMonitor initialView={view} />
 </BaseLayout>
