@@ -1,7 +1,7 @@
 # Head Game Easter Egg Design
 
 **Date:** 2026-09-23  
-**Status:** Awaiting written-spec review
+**Status:** Approved
 
 ## Overview
 
@@ -100,12 +100,16 @@ Each sprite spawns at a random horizontal position across the safe top width of 
 
 Purple is the standard spawn. At the start of a gold cycle, select a random integer from 5 through 10. After that many purple sprites have spawned, the next sprite is gold. Once gold spawns, select a new random purple count from 5 through 10 and repeat.
 
-Every successful catch increases difficulty by:
+Difficulty advances by successful catch count, not by score. A gold catch therefore advances the curve by one catch rather than five score steps.
 
-- Shortening the interval before the next spawn.
-- Increasing sprite fall speed.
+The progression is intentionally quick:
 
-Both values have explicit sensible caps so the game remains playable and does not reach a zero or negative interval. Difficulty progression and gold scheduling are session-local and reset when a new run starts.
+- Fall speed starts at 0.30 playfield heights per second and increases by 0.035 per successful catch. It reaches its hard cap of 0.65 playfield heights per second at the tenth catch.
+- The spawn interval starts at 900 milliseconds and decreases by 45 milliseconds per successful catch. It reaches 450 milliseconds at the tenth catch, then continues decreasing to a hard floor of 270 milliseconds at the fourteenth catch.
+- After the tenth catch, fall speed remains capped and additional pressure comes from denser spawning rather than objects becoming impossibly fast.
+- At most ten falling sprites may be active simultaneously. If the cap is reached, the next spawn is delayed rather than exceeding it.
+
+This makes the game feel reasonably fast by roughly ten caught sprites while preserving a playable movement window. Difficulty progression and gold scheduling are session-local and reset when a new run starts.
 
 ## Controls
 
@@ -194,8 +198,10 @@ Automated rule tests should cover:
 - The third miss ending the game.
 - Timer expiration ending the game.
 - Gold scheduling after an injected random count of 5 through 10 purple spawns and resetting the cycle afterward.
-- Progressive spawn-interval reduction and fall-speed increase.
-- Both difficulty caps.
+- Fall speed reaching 0.65 playfield heights per second at the tenth catch and never exceeding it.
+- Spawn interval reaching 450 milliseconds at the tenth catch, reaching 270 milliseconds at the fourteenth catch, and never dropping below it.
+- A gold catch advancing difficulty by one catch while still awarding five points.
+- The ten-active-sprite cap delaying additional spawns.
 - Random spawn positions remaining within the safe horizontal bounds.
 - Collision behavior at inside, outside, and edge-touching boundaries.
 - Valid high-score replacement and preservation.
