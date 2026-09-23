@@ -22,11 +22,12 @@ test("every folder renders one nine-card Latest Preview grid", () => {
 });
 
 test("Home transitions leave enough time for control travel and letter crumble", () => {
-  assert.match(component, /const controlMotionDuration = 1400/);
-  assert.match(component, /const homeTransitionDuration = 1500/);
+  assert.match(component, /const controlMotionDuration = 900/);
+  assert.match(component, /const homeExitDuration = 2150/);
+  assert.match(component, /const homeReturnDuration = 2600/);
   assert.match(component, /duration: controlMotionDuration/);
-  assert.match(component, /leaving \|\| returning \? homeTransitionDuration : 150/);
-  assert.match(component, /\.is-leaving-home \.crumble-char\{animation:crumble \.8s/);
+  assert.match(component, /leaving \? homeExitDuration : returning \? homeReturnDuration : 150/);
+  assert.match(component, /\.is-leaving-home \.crumble-char\{animation:crumble \.65s/);
   assert.match(component, /offset: \.82/);
   assert.match(component, /offset: \.18/);
 });
