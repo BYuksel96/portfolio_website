@@ -160,6 +160,12 @@ const { handle = "@CREATORHANDLE" } = Astro.props;
     try { oscillator.disconnect(); } catch {}
     oscillator = null;
   }
+  function closeAudioContext() {
+    if (!audioContext) return;
+    try { audioContext.close(); } catch {}
+    audioContext = null;
+  }
+
 
   function playAlarm() {
     if (muted) return;
@@ -333,6 +339,7 @@ const { handle = "@CREATORHANDLE" } = Astro.props;
     dragging = false;
     if ("speechSynthesis" in window) speechSynthesis.cancel();
     stopOscillator();
+    closeAudioContext();
     game = null;
     lastFrame = 0;
     mouthClosed = false;
@@ -441,7 +448,7 @@ const { handle = "@CREATORHANDLE" } = Astro.props;
   .game-over>div{display:grid;justify-items:center;gap:18px}.game-over p{margin:0;font-size:1.1rem;font-weight:900}.creator-tab{position:fixed;left:max(14px,env(safe-area-inset-left));bottom:max(12px,env(safe-area-inset-bottom));z-index:8;display:flex;align-items:center;gap:12px;min-width:180px;min-height:48px;padding:11px 18px;border:1px solid rgba(255,255,255,.75);border-radius:14px 14px 5px 5px;background:#e8ece9;color:#151816;font:900 .74rem/1 system-ui,sans-serif;box-shadow:0 8px 28px rgba(0,0,0,.4);cursor:pointer}.creator-tab span{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:#f1ad30;color:#4b2b00}.mute-control{position:fixed;right:max(16px,env(safe-area-inset-right));bottom:max(16px,env(safe-area-inset-bottom));z-index:8;padding:10px 14px;border:1px solid rgba(255,255,255,.58);border-radius:999px;background:#131318;color:#fff;font:800 .7rem/1 system-ui,sans-serif;cursor:pointer}.mute-control[aria-pressed=true]{background:#fff;color:#111}.easter-egg button:focus-visible,.easter-egg input:focus-visible{outline:3px solid #ffd34e;outline-offset:4px}
   .easter-egg.is-alarm:before,.has-edge-pulse:after{content:"";position:absolute;inset:0;z-index:7;pointer-events:none;background:radial-gradient(circle,transparent 22%,rgba(255,25,58,.2) 56%,rgba(117,0,17,.9) 100%);animation:alarm-pulse .7s ease-in-out 2 alternate}.is-shaking .cabinet{animation:cabinet-shake .34s linear}.sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
   @keyframes egg-blink{50%{opacity:0}}@keyframes egg-wave{from{transform:translateY(-5px) rotate(-1deg)}to{transform:translateY(5px) rotate(1deg)}}@keyframes fly-x{to{transform:translateX(65px) rotate(18deg)}}@keyframes fly-y{to{transform:translateY(70px) rotate(-14deg)}}@keyframes alarm-pulse{from{opacity:.35}to{opacity:1}}@keyframes cabinet-shake{0%,100%{transform:none}25%{transform:translate(-8px,3px)}50%{transform:translate(7px,-2px)}75%{transform:translate(-4px,-1px)}}@keyframes bonus-pop{0%{opacity:0;transform:translateY(12px) scale(.7)}25%{opacity:1}100%{opacity:0;transform:translateY(-22px) scale(1.05)}}
-  @media(max-width:720px){.egg-screen{width:calc(100vw - 16px);height:calc(100dvh - 94px);min-height:300px;border-radius:20px}.menu-copy{width:84%;padding:20px}.menu-copy h2,.game-over h2{font-size:clamp(2.6rem,14vw,4.8rem)}.flyer{width:54px}.hud{padding:10px 12px;font-size:.7rem}.creator-tab{left:8px;bottom:8px;min-width:150px}.mute-control{right:8px;bottom:8px}.passcode-error{bottom:8%}}
-  @media(max-height:520px){.egg-screen{height:calc(100dvh - 70px);width:min(840px,calc(100vw - 30px));min-height:260px}.creator-tab,.mute-control{min-height:38px;padding:8px 12px}.menu-copy{gap:8px;padding:12px}.menu-copy h2,.game-over h2{font-size:2.8rem}}
+  @media(max-width:720px){.egg-screen{width:calc(100vw - 16px);height:calc(100dvh - 136px);min-height:300px;border-radius:20px}.menu-copy{width:84%;padding:20px}.menu-copy h2,.game-over h2{font-size:clamp(2.6rem,14vw,4.8rem)}.flyer{width:54px}.hud{padding:10px 12px;font-size:.7rem}.creator-tab{left:8px;bottom:8px;min-width:150px}.mute-control{right:8px;bottom:8px}.passcode-error{bottom:8%}}
+  @media(max-height:520px){.egg-screen{height:calc(100dvh - 100px);width:min(840px,calc(100vw - 30px));min-height:260px}.creator-tab,.mute-control{min-height:38px;padding:8px 12px}.menu-copy{gap:8px;padding:12px}.menu-copy h2,.game-over h2{font-size:2.8rem}}
   @media(prefers-reduced-motion:reduce){.easter-egg,.easter-egg *{scroll-behavior:auto!important}.easter-egg,.flyer,.passcode-error,.is-shaking .cabinet,.easter-egg.is-alarm:before,.has-edge-pulse:after,.has-bonus .score-bonus,.has-bonus [data-time-bonus]{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}.flyer{transform:none!important}}
 </style>

@@ -44,6 +44,7 @@ test("one cleanup path cancels animation, timers, input, speech, and audio", () 
     "heldKeys.clear",
     "speechSynthesis.cancel",
     "oscillator",
+    "audioContext.close",
     "sessionToken",
   ]) {
     assert.match(source, new RegExp(token.replace(".", "\\.")));
