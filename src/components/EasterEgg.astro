@@ -1,0 +1,447 @@
+---
+const { handle = "@CREATORHANDLE" } = Astro.props;
+---
+
+<section class="easter-egg" data-easter-egg data-game-state="portfolio" aria-hidden="true" inert>
+  <button type="button" class="creator-tab" data-restore-portfolio aria-label="Restore portfolio">
+    <span aria-hidden="true">—</span>{handle}
+  </button>
+
+  <div class="egg-screen passcode-screen" data-screen="passcode" hidden>
+    <form class="passcode-form" data-passcode-form>
+      <label for="egg-code">Enter The Passcode</label>
+      <div class="code-field">
+        <input id="egg-code" data-passcode-input placeholder="Enter Code Here" autocomplete="off" spellcheck="false" />
+        <span class="code-caret" aria-hidden="true">|</span>
+      </div>
+      <button type="submit">Enter</button>
+    </form>
+    <p class="passcode-error" data-passcode-error role="alert" hidden>
+      Oooo GURRRLLL! You ain't saucy enough to enturrr!
+    </p>
+  </div>
+
+  <div class="egg-screen game-menu" data-screen="menu" hidden>
+    <div class="menu-flyers" aria-hidden="true">
+      <img class="flyer flyer-one" src="/assets/easter-egg/purple-sprite.webp" alt="" />
+      <img class="flyer flyer-two" src="/assets/easter-egg/gold-sprite.webp" alt="" />
+      <img class="flyer flyer-three" src="/assets/easter-egg/purple-sprite.webp" alt="" />
+      <img class="flyer flyer-four" src="/assets/easter-egg/gold-sprite.webp" alt="" />
+    </div>
+    <div class="menu-copy">
+      <p class="arcade-kicker">Insert confidence</p>
+      <h2>Head Game Strong</h2>
+      <p>How good is your head game?</p>
+      <p class="high-score-line">High Score <output data-high-score>0</output></p>
+      <button type="button" data-play>Play Now!</button>
+    </div>
+  </div>
+
+  <div class="egg-screen cabinet" data-screen="playing" hidden>
+    <div class="hud" aria-label="Game status">
+      <div class="lives" data-lives aria-label="3 lives remaining">
+        <span class="life" data-life="0" aria-hidden="true"></span>
+        <span class="life" data-life="1" aria-hidden="true"></span>
+        <span class="life" data-life="2" aria-hidden="true"></span>
+      </div>
+      <div class="timer-wrap">Time <output data-time>60</output><span data-time-bonus aria-hidden="true"></span></div>
+      <div>Score <output data-score>0</output></div>
+    </div>
+    <canvas data-game-canvas aria-label="Head Game playfield. Move with Left and Right arrows, mouse, or touch."></canvas>
+    <span class="score-bonus" data-score-bonus aria-hidden="true"></span>
+  </div>
+
+  <div class="egg-screen game-over" data-screen="game-over" hidden>
+    <div>
+      <p class="arcade-kicker">Run complete</p>
+      <h2>Game Over</h2>
+      <p>Final Score <output data-final-score>0</output></p>
+      <p>High Score <output data-final-high-score>0</output></p>
+      <button type="button" data-play-again>Play Again</button>
+    </div>
+  </div>
+
+  <button type="button" class="mute-control" data-mute aria-pressed="false">Sound on</button>
+  <p class="sr-only" data-game-status aria-live="polite"></p>
+</section>
+
+<script>
+  // @ts-nocheck
+  import {
+    GAME_CONSTANTS,
+    createGameState,
+    movePlayer,
+    resolveHighScore,
+    stepGame,
+  } from "../lib/head-game.js";
+  import { loadHighScore, saveHighScore } from "../lib/easter-egg-storage.js";
+
+  const root = document.querySelector("[data-easter-egg]");
+  if (!(root instanceof HTMLElement)) throw new Error("Easter egg failed to initialise");
+
+  const ASSETS = Object.freeze({
+    purple: "/assets/easter-egg/purple-sprite.webp",
+    gold: "/assets/easter-egg/gold-sprite.webp",
+    open: "/assets/easter-egg/head-open.webp",
+    closed: "/assets/easter-egg/head-closed.webp",
+  });
+  const images = Object.fromEntries(
+    Object.entries(ASSETS).map(([key, source]) => {
+      const image = new Image();
+      image.src = source;
+      return [key, image];
+    }),
+  );
+  const screens = [...root.querySelectorAll("[data-screen]")];
+  const passcodeForm = root.querySelector("[data-passcode-form]");
+  const passcodeInput = root.querySelector("[data-passcode-input]");
+  const passcodeError = root.querySelector("[data-passcode-error]");
+  const playButton = root.querySelector("[data-play]");
+  const playAgain = root.querySelector("[data-play-again]");
+  const restoreButton = root.querySelector("[data-restore-portfolio]");
+  const muteButton = root.querySelector("[data-mute]");
+  const canvas = root.querySelector("[data-game-canvas]");
+  const context = canvas instanceof HTMLCanvasElement ? canvas.getContext("2d") : null;
+  const scoreOutput = root.querySelector("[data-score]");
+  const timeOutput = root.querySelector("[data-time]");
+  const highScoreOutputs = [...root.querySelectorAll("[data-high-score], [data-final-high-score]")];
+  const finalScoreOutput = root.querySelector("[data-final-score]");
+  const lives = root.querySelector("[data-lives]");
+  const status = root.querySelector("[data-game-status]");
+  const scoreBonus = root.querySelector("[data-score-bonus]");
+  const timeBonus = root.querySelector("[data-time-bonus]");
+  const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
+  const heldKeys = new Set();
+  let uiState = "portfolio";
+  let game = null;
+  let muted = false;
+  let frameId = 0;
+  let alarmTimer = 0;
+  let mouthTimer = 0;
+  let bonusTimer = 0;
+  let lastFrame = 0;
+  let dragging = false;
+  let mouthClosed = false;
+  let sessionToken = 0;
+  let oscillator = null;
+  let audioContext = null;
+  let highScore = (() => {
+    try { return loadHighScore(window.localStorage); } catch { return 0; }
+  })();
+
+  function announce(message) {
+    if (status instanceof HTMLElement) status.textContent = message;
+  }
+
+  function updateHighScoreText() {
+    highScoreOutputs.forEach((output) => { output.textContent = String(highScore); });
+  }
+
+  function show(next) {
+    uiState = next;
+    root.dataset.gameState = next;
+    screens.forEach((screen) => {
+      if (screen instanceof HTMLElement) screen.hidden = screen.dataset.screen !== next;
+    });
+    const target = next === "passcode" ? passcodeInput : next === "menu" ? playButton : next === "game-over" ? playAgain : null;
+    if (target instanceof HTMLElement) requestAnimationFrame(() => target.focus({ preventScroll: true }));
+  }
+
+  function clearAlarm() {
+    clearTimeout(alarmTimer);
+    root.classList.remove("is-alarm");
+    if (passcodeError instanceof HTMLElement) passcodeError.hidden = true;
+    stopOscillator();
+  }
+
+  function stopOscillator() {
+    if (!oscillator) return;
+    try { oscillator.stop(); } catch {}
+    try { oscillator.disconnect(); } catch {}
+    oscillator = null;
+  }
+
+  function playAlarm() {
+    if (muted) return;
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return;
+    stopOscillator();
+    audioContext ||= new AudioContextClass();
+    oscillator = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    oscillator.type = "sawtooth";
+    oscillator.frequency.setValueAtTime(180, audioContext.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(520, audioContext.currentTime + 0.32);
+    gain.gain.setValueAtTime(0.035, audioContext.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.38);
+    oscillator.connect(gain).connect(audioContext.destination);
+    oscillator.start();
+    oscillator.stop(audioContext.currentTime + 0.4);
+  }
+
+  function showAlarmForTwoSeconds() {
+    clearAlarm();
+    root.classList.add("is-alarm");
+    if (passcodeError instanceof HTMLElement) passcodeError.hidden = false;
+    announce("Incorrect passcode");
+    alarmTimer = window.setTimeout(clearAlarm, 2000);
+  }
+
+  function sayYummy() {
+    if (muted || !("speechSynthesis" in window)) return;
+    speechSynthesis.cancel();
+    const cue = new SpeechSynthesisUtterance("Yummy");
+    cue.rate = 1.15;
+    cue.pitch = 1.12;
+    speechSynthesis.speak(cue);
+  }
+
+  function resizeCanvas() {
+    if (!(canvas instanceof HTMLCanvasElement) || !context) return;
+    const rect = canvas.getBoundingClientRect();
+    const ratio = Math.min(devicePixelRatio || 1, 2);
+    canvas.width = Math.max(1, Math.round(rect.width * ratio));
+    canvas.height = Math.max(1, Math.round(rect.height * ratio));
+    context.setTransform(ratio, 0, 0, ratio, 0, 0);
+    if (game) renderCanvas(game);
+  }
+
+  function drawImageContained(image, x, y, width, height, rotation = 0) {
+    if (!context || !image.complete) return;
+    context.save();
+    context.translate(x, y);
+    context.rotate(rotation);
+    context.drawImage(image, -width / 2, -height / 2, width, height);
+    context.restore();
+  }
+
+  function renderCanvas(state) {
+    if (!(canvas instanceof HTMLCanvasElement) || !context || !state) return;
+    const width = canvas.clientWidth;
+    const height = canvas.clientHeight;
+    context.clearRect(0, 0, width, height);
+    const mist = context.createRadialGradient(width * 0.5, height * 0.48, 0, width * 0.5, height * 0.48, width * 0.7);
+    mist.addColorStop(0, "#202026");
+    mist.addColorStop(0.55, "#09090d");
+    mist.addColorStop(1, "#000");
+    context.fillStyle = mist;
+    context.fillRect(0, 0, width, height);
+    for (const sprite of state.sprites) {
+      const size = sprite.width * width;
+      drawImageContained(images[sprite.kind], sprite.x * width, sprite.y * height, size, size, Math.PI);
+    }
+    const headWidth = GAME_CONSTANTS.playerWidth * width;
+    const headHeight = Math.min(headWidth, GAME_CONSTANTS.playerHeight * height * 1.3);
+    drawImageContained(
+      mouthClosed ? images.closed : images.open,
+      state.playerX * width,
+      height - headHeight * 0.48,
+      headWidth,
+      headHeight,
+    );
+  }
+
+  function syncHud(state) {
+    if (!state) return;
+    if (scoreOutput instanceof HTMLElement) scoreOutput.textContent = String(state.score);
+    if (timeOutput instanceof HTMLElement) timeOutput.textContent = String(Math.max(0, Math.ceil(state.timeRemaining)));
+    if (lives instanceof HTMLElement) {
+      const remaining = Math.max(0, GAME_CONSTANTS.lives - state.misses);
+      lives.setAttribute("aria-label", `${remaining} ${remaining === 1 ? "life" : "lives"} remaining`);
+      lives.querySelectorAll("[data-life]").forEach((life, index) => {
+        life.classList.toggle("is-lost", index < state.misses);
+      });
+    }
+  }
+
+  function flashBonus(value) {
+    clearTimeout(bonusTimer);
+    if (scoreBonus instanceof HTMLElement) scoreBonus.textContent = `+${value}`;
+    if (timeBonus instanceof HTMLElement) timeBonus.textContent = `+${value}s`;
+    root.classList.remove("has-bonus");
+    requestAnimationFrame(() => root.classList.add("has-bonus"));
+    bonusTimer = window.setTimeout(() => root.classList.remove("has-bonus"), 650);
+  }
+
+  function consumeEffects(effects) {
+    for (const effect of effects) {
+      if (effect.type === "catch") {
+        mouthClosed = true;
+        clearTimeout(mouthTimer);
+        mouthTimer = window.setTimeout(() => { mouthClosed = false; }, 180);
+        flashBonus(effect.value);
+        sayYummy();
+      } else if (effect.type === "miss") {
+        root.classList.remove("has-edge-pulse", "is-shaking");
+        requestAnimationFrame(() => root.classList.add("has-edge-pulse", "is-shaking"));
+        window.setTimeout(() => root.classList.remove("has-edge-pulse", "is-shaking"), 450);
+      }
+    }
+  }
+
+  function applyHeldKeys(state, delta) {
+    if (!state) return state;
+    const direction = (heldKeys.has("ArrowRight") ? 1 : 0) - (heldKeys.has("ArrowLeft") ? 1 : 0);
+    return direction ? movePlayer(state, state.playerX + direction * delta * 0.7) : state;
+  }
+
+  function finishRun() {
+    if (!game) return;
+    cancelAnimationFrame(frameId);
+    highScore = resolveHighScore(highScore, game.score);
+    try { saveHighScore(window.localStorage, highScore); } catch {}
+    updateHighScoreText();
+    if (finalScoreOutput instanceof HTMLElement) finalScoreOutput.textContent = String(game.score);
+    announce(`Game over. Final score ${game.score}. High score ${highScore}.`);
+    show("game-over");
+  }
+
+  function frame(now, token) {
+    if (token !== sessionToken || uiState !== "playing" || !game) return;
+    const delta = lastFrame ? (now - lastFrame) / 1000 : 0;
+    lastFrame = now;
+    if (!document.hidden) {
+      game = stepGame(applyHeldKeys(game, delta), delta, Math.random);
+      renderCanvas(game);
+      syncHud(game);
+      consumeEffects(game.effects);
+    }
+    if (game.status === "game-over") finishRun();
+    else frameId = requestAnimationFrame((time) => frame(time, token));
+  }
+
+  function startGame() {
+    cleanupSession();
+    game = createGameState();
+    mouthClosed = false;
+    show("playing");
+    syncHud(game);
+    resizeCanvas();
+    renderCanvas(game);
+    announce("Game started. Three lives. Sixty seconds.");
+    const token = sessionToken;
+    frameId = requestAnimationFrame((time) => frame(time, token));
+  }
+
+  function cleanupSession() {
+    sessionToken += 1;
+    cancelAnimationFrame(frameId);
+    clearTimeout(alarmTimer);
+    clearTimeout(mouthTimer);
+    clearTimeout(bonusTimer);
+    heldKeys.clear();
+    dragging = false;
+    if ("speechSynthesis" in window) speechSynthesis.cancel();
+    stopOscillator();
+    game = null;
+    lastFrame = 0;
+    mouthClosed = false;
+    root.classList.remove("is-alarm", "is-shaking", "has-edge-pulse", "has-bonus");
+  }
+
+  function restorePortfolio() {
+    cleanupSession();
+    if (passcodeInput instanceof HTMLInputElement) passcodeInput.value = "";
+    clearAlarm();
+    show("portfolio");
+    root.inert = true;
+    root.setAttribute("aria-hidden", "true");
+    root.classList.remove("is-active");
+    document.dispatchEvent(new CustomEvent("portfolio:restore-request"));
+  }
+
+  function openPasscode() {
+    cleanupSession();
+    updateHighScoreText();
+    root.inert = false;
+    root.setAttribute("aria-hidden", "false");
+    root.classList.add("is-active");
+    show("passcode");
+    announce("Enter the passcode to open the game.");
+  }
+
+  function normalizedPointerX(event) {
+    if (!(canvas instanceof HTMLCanvasElement)) return 0.5;
+    const rect = canvas.getBoundingClientRect();
+    return (event.clientX - rect.left) / Math.max(1, rect.width);
+  }
+
+  function onKeyDown(event) {
+    if (uiState !== "playing" || !["ArrowLeft", "ArrowRight"].includes(event.key)) return;
+    event.preventDefault();
+    heldKeys.add(event.key);
+  }
+  function onKeyUp(event) { heldKeys.delete(event.key); }
+
+  passcodeForm?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    if (!(passcodeInput instanceof HTMLInputElement)) return;
+    if (passcodeInput.value.trim().toUpperCase() === "P3N15") {
+      clearAlarm();
+      announce("Passcode accepted.");
+      show("menu");
+    } else {
+      showAlarmForTwoSeconds();
+      playAlarm();
+      passcodeInput.select();
+    }
+  });
+  playButton?.addEventListener("click", startGame);
+  playAgain?.addEventListener("click", startGame);
+  restoreButton?.addEventListener("click", restorePortfolio);
+  muteButton?.addEventListener("click", () => {
+    muted = !muted;
+    muteButton.setAttribute("aria-pressed", String(muted));
+    muteButton.textContent = muted ? "Muted" : "Sound on";
+    if (muted) {
+      if ("speechSynthesis" in window) speechSynthesis.cancel();
+      stopOscillator();
+    }
+  });
+  canvas?.addEventListener("pointerdown", (event) => {
+    if (!game || !(canvas instanceof HTMLCanvasElement)) return;
+    dragging = true;
+    canvas.setPointerCapture(event.pointerId);
+    game = movePlayer(game, normalizedPointerX(event));
+  });
+  canvas?.addEventListener("pointermove", (event) => {
+    if (!game || (event.pointerType !== "mouse" && !dragging)) return;
+    game = movePlayer(game, normalizedPointerX(event));
+  });
+  canvas?.addEventListener("pointerup", () => { dragging = false; });
+  canvas?.addEventListener("pointercancel", () => { dragging = false; });
+  window.addEventListener("keydown", onKeyDown);
+  window.addEventListener("keyup", onKeyUp);
+  window.addEventListener("blur", () => heldKeys.clear());
+  window.addEventListener("resize", resizeCanvas);
+  document.addEventListener("visibilitychange", () => {
+    heldKeys.clear();
+    lastFrame = 0;
+    announce(document.hidden ? "Game paused" : "Game resumed");
+  });
+  document.addEventListener("portfolio:easter-egg-open", openPasscode);
+  updateHighScoreText();
+
+  if (new URLSearchParams(location.search).has("e2e")) {
+    window.__HEAD_GAME_DEBUG__ = {
+      get state() { return { uiState, game, sessionToken, frameId }; },
+      endRun() { if (game) { game = { ...game, status: "game-over" }; finishRun(); } },
+      setHidden(value) { Object.defineProperty(document, "hidden", { configurable: true, value }); document.dispatchEvent(new Event("visibilitychange")); },
+    };
+  }
+</script>
+
+<style is:global>
+  .easter-egg{position:fixed;inset:0;z-index:100;display:grid;place-items:center;overflow:clip;background:radial-gradient(circle at 50% 45%,#25222d 0,#09090d 48%,#000 100%);color:#fff;font-family:"Courier New",ui-monospace,monospace;opacity:0;visibility:hidden;transition:opacity .35s ease}
+  .easter-egg.is-active{opacity:1;visibility:visible}
+  .egg-screen{position:relative;width:min(980px,calc(100vw - 48px));height:min(720px,calc(100dvh - 128px));min-height:360px;overflow:hidden;border:2px solid rgba(255,255,255,.7);border-radius:28px;background:radial-gradient(circle at 50% 42%,rgba(68,60,78,.62),rgba(7,7,10,.97) 68%),#050507;box-shadow:0 28px 100px rgba(0,0,0,.68),inset 0 0 70px rgba(150,104,190,.1)}
+  .passcode-screen,.game-over{display:grid;place-items:center;text-align:center}.passcode-form{display:grid;justify-items:center;gap:18px;width:min(540px,82%)}.passcode-form label{font-size:clamp(1.4rem,3vw,2.4rem);font-weight:900;letter-spacing:.02em;text-transform:uppercase}.code-field{position:relative;width:100%}.code-field input{width:100%;padding:17px 50px 17px 22px;border:2px solid #20221f;border-radius:999px;background:#f7f8f5;color:#111;font:700 1rem/1.2 inherit;box-shadow:0 14px 30px rgba(0,0,0,.28)}.code-caret{position:absolute;right:24px;top:50%;translate:0 -50%;color:#9b52dc;font-weight:900;animation:egg-blink .8s steps(1) infinite}.passcode-form button,.menu-copy button,.game-over button{border:2px solid #fff;border-radius:999px;padding:14px 28px;background:#b967f0;color:#0b0610;font:900 .9rem/1 inherit;text-transform:uppercase;letter-spacing:.08em;box-shadow:5px 5px 0 #fff;cursor:pointer;transition:translate .15s ease,box-shadow .15s ease,background .15s ease}.passcode-form button:hover,.menu-copy button:hover,.game-over button:hover{translate:2px 2px;box-shadow:3px 3px 0 #fff;background:#d49aff}.passcode-error{position:absolute;inset:auto 5% 12%;font-size:clamp(1rem,2.8vw,2rem);font-weight:900;color:#fff;text-shadow:3px 3px 0 #6e0014;animation:egg-wave .55s ease-in-out infinite alternate}
+  .game-menu{display:grid;place-items:center}.menu-copy{position:relative;z-index:2;display:grid;justify-items:center;gap:14px;width:min(600px,72%);padding:42px;text-align:center;background:radial-gradient(circle,rgba(0,0,0,.92),rgba(0,0,0,.64) 68%,transparent);border-radius:50%}.arcade-kicker{margin:0;color:#cfa1ef;font-size:.72rem;font-weight:900;letter-spacing:.2em;text-transform:uppercase}.menu-copy h2,.game-over h2{margin:0;font-family:Impact,"Arial Black",sans-serif;font-size:clamp(3.2rem,8vw,7rem);line-height:.82;letter-spacing:.025em;text-transform:uppercase;text-shadow:4px 4px 0 #7423aa,8px 8px 0 rgba(255,255,255,.12)}.menu-copy>p:not(.arcade-kicker){margin:0;font-size:clamp(.95rem,2vw,1.25rem)}.high-score-line{padding:9px 16px;border:1px solid rgba(255,255,255,.42);border-radius:999px}.menu-flyers{position:absolute;inset:0}.flyer{position:absolute;width:clamp(54px,9vw,100px);filter:drop-shadow(0 10px 12px rgba(0,0,0,.5));opacity:.68}.flyer-one{left:4%;top:10%;animation:fly-x 6s ease-in-out infinite alternate}.flyer-two{right:4%;top:12%;animation:fly-y 5s ease-in-out infinite alternate}.flyer-three{left:8%;bottom:9%;animation:fly-y 7s ease-in-out infinite alternate-reverse}.flyer-four{right:7%;bottom:8%;animation:fly-x 6.5s ease-in-out infinite alternate-reverse}
+  .cabinet{display:grid;grid-template-rows:auto minmax(0,1fr);background:#020204}.hud{position:relative;z-index:3;display:grid;grid-template-columns:1fr 1fr 1fr;align-items:center;padding:14px 20px;border-bottom:2px solid rgba(255,255,255,.45);background:#111118;font-weight:900;text-transform:uppercase}.hud>div:nth-child(2){text-align:center}.hud>div:last-child{text-align:right}.timer-wrap{position:relative}.timer-wrap [data-time-bonus]{position:absolute;top:100%;left:50%;translate:-50% 8px;color:#65ff8d;opacity:0}.lives{display:flex;gap:8px}.life{width:18px;height:30px;background:#fff;mask:url('/assets/easter-egg/purple-sprite.webp') center/contain no-repeat;-webkit-mask:url('/assets/easter-egg/purple-sprite.webp') center/contain no-repeat;filter:drop-shadow(0 0 2px #fff);opacity:.42}.life.is-lost{background:#ff234e;opacity:1;filter:drop-shadow(0 0 8px #ff234e)}[data-game-canvas]{display:block;width:100%;height:100%;min-height:0;touch-action:none;background:#000}.score-bonus{position:absolute;right:16%;bottom:20%;z-index:4;color:#65ff8d;font-size:1.2rem;font-weight:900;opacity:0}.has-bonus .score-bonus,.has-bonus [data-time-bonus]{animation:bonus-pop .65s ease both}
+  .game-over>div{display:grid;justify-items:center;gap:18px}.game-over p{margin:0;font-size:1.1rem;font-weight:900}.creator-tab{position:fixed;left:max(14px,env(safe-area-inset-left));bottom:max(12px,env(safe-area-inset-bottom));z-index:8;display:flex;align-items:center;gap:12px;min-width:180px;min-height:48px;padding:11px 18px;border:1px solid rgba(255,255,255,.75);border-radius:14px 14px 5px 5px;background:#e8ece9;color:#151816;font:900 .74rem/1 system-ui,sans-serif;box-shadow:0 8px 28px rgba(0,0,0,.4);cursor:pointer}.creator-tab span{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:#f1ad30;color:#4b2b00}.mute-control{position:fixed;right:max(16px,env(safe-area-inset-right));bottom:max(16px,env(safe-area-inset-bottom));z-index:8;padding:10px 14px;border:1px solid rgba(255,255,255,.58);border-radius:999px;background:#131318;color:#fff;font:800 .7rem/1 system-ui,sans-serif;cursor:pointer}.mute-control[aria-pressed=true]{background:#fff;color:#111}.easter-egg button:focus-visible,.easter-egg input:focus-visible{outline:3px solid #ffd34e;outline-offset:4px}
+  .easter-egg.is-alarm:before,.has-edge-pulse:after{content:"";position:absolute;inset:0;z-index:7;pointer-events:none;background:radial-gradient(circle,transparent 22%,rgba(255,25,58,.2) 56%,rgba(117,0,17,.9) 100%);animation:alarm-pulse .7s ease-in-out 2 alternate}.is-shaking .cabinet{animation:cabinet-shake .34s linear}.sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+  @keyframes egg-blink{50%{opacity:0}}@keyframes egg-wave{from{transform:translateY(-5px) rotate(-1deg)}to{transform:translateY(5px) rotate(1deg)}}@keyframes fly-x{to{transform:translateX(65px) rotate(18deg)}}@keyframes fly-y{to{transform:translateY(70px) rotate(-14deg)}}@keyframes alarm-pulse{from{opacity:.35}to{opacity:1}}@keyframes cabinet-shake{0%,100%{transform:none}25%{transform:translate(-8px,3px)}50%{transform:translate(7px,-2px)}75%{transform:translate(-4px,-1px)}}@keyframes bonus-pop{0%{opacity:0;transform:translateY(12px) scale(.7)}25%{opacity:1}100%{opacity:0;transform:translateY(-22px) scale(1.05)}}
+  @media(max-width:720px){.egg-screen{width:calc(100vw - 16px);height:calc(100dvh - 94px);min-height:300px;border-radius:20px}.menu-copy{width:84%;padding:20px}.menu-copy h2,.game-over h2{font-size:clamp(2.6rem,14vw,4.8rem)}.flyer{width:54px}.hud{padding:10px 12px;font-size:.7rem}.creator-tab{left:8px;bottom:8px;min-width:150px}.mute-control{right:8px;bottom:8px}.passcode-error{bottom:8%}}
+  @media(max-height:520px){.egg-screen{height:calc(100dvh - 70px);width:min(840px,calc(100vw - 30px));min-height:260px}.creator-tab,.mute-control{min-height:38px;padding:8px 12px}.menu-copy{gap:8px;padding:12px}.menu-copy h2,.game-over h2{font-size:2.8rem}}
+  @media(prefers-reduced-motion:reduce){.easter-egg,.easter-egg *{scroll-behavior:auto!important}.easter-egg,.flyer,.passcode-error,.is-shaking .cabinet,.easter-egg.is-alarm:before,.has-edge-pulse:after,.has-bonus .score-bonus,.has-bonus [data-time-bonus]{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}.flyer{transform:none!important}}
+</style>
