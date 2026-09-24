@@ -53,6 +53,21 @@ test("the document is viewport locked while the monitor workspace owns overflow"
   assert.match(css, /@media\s*\(max-width:\s*720px\)[\s\S]*?grid-template-rows/);
 });
 
+
+test("monitor provides one accessible amber minimize action", async () => {
+  const source = await read("../src/components/PortfolioMonitor.astro");
+  assert.match(source, /data-minimize-monitor/);
+  assert.match(source, /aria-label="Minimize portfolio and open game"/);
+  assert.doesNotMatch(source, /<span class="window-dots"/);
+});
+
+test("restore cancels transitions, renders Home, and restores focus", async () => {
+  const source = await read("../src/components/PortfolioMonitor.astro");
+  assert.match(source, /portfolio:restore-request/);
+  assert.match(source, /clearTimeout\(timer\)/);
+  assert.match(source, /clearControlAnimations\(\)/);
+  assert.match(source, /render\("home", true\)/);
+});
 test("contacts contains an email form and search renders grouped results", async () => {
   const component = await read("../src/components/PortfolioMonitor.astro");
 

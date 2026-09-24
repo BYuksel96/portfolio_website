@@ -1,8 +1,10 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import EasterEgg from "../components/EasterEgg.astro";
 import PortfolioMonitor from "../components/PortfolioMonitor.astro";
 import { portfolioContacts } from "../lib/portfolio-catalog.js";
 ---
 <BaseLayout title={`${portfolioContacts.name} | Creative Portfolio`}>
   <PortfolioMonitor initialView="home" />
+  <EasterEgg handle={portfolioContacts.handle} />
 </BaseLayout>

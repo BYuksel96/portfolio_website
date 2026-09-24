@@ -17,7 +17,9 @@ const letters = (value) => [...value];
       {Array.from({ length: 24 }).map(() => <span class="split-flap-tile"><span class="split-flap-card"><span class="split-flap-face split-flap-face-front"></span><span class="split-flap-face split-flap-face-back"></span></span></span>)}
     </div>
     <header class="monitor-bar" aria-label="Portfolio status">
-      <span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>{profile.location}</span><span>Portfolio OS</span>
+      <button class="monitor-minimize" type="button" data-minimize-monitor aria-label="Minimize portfolio and open game">
+        <span aria-hidden="true"></span>
+      </button><span>{profile.location}</span><span>Portfolio OS</span>
     </header>
 
     <section class="home-scene" data-home-scene aria-hidden={!isHome} aria-labelledby="page-title">
@@ -94,6 +96,7 @@ const letters = (value) => [...value];
   const homeScene = app.querySelector("[data-home-scene]");
   const workspace = app.querySelector("[data-workspace]");
   const scroller = app.querySelector("[data-workspace-scroll]");
+  const minimizeButton = app.querySelector("[data-minimize-monitor]");
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const controlMotionDuration = 900;
   const exitFolderDelay = 1150;
@@ -106,6 +109,33 @@ const letters = (value) => [...value];
   function clearControlAnimations() {
     controlAnimations.forEach((animation) => animation.cancel());
     controlAnimations = [];
+  }
+  function finishPortfolioTransition() {
+    clearTimeout(timer);
+    clearControlAnimations();
+    app.removeAttribute("aria-busy");
+    app.classList.remove("is-transitioning", "is-leaving-home", "is-returning-home");
+  }
+  function restoreHome() {
+    finishPortfolioTransition();
+    document.documentElement.classList.remove("has-easter-egg");
+    app.classList.remove("is-minimized");
+    app.inert = false;
+    app.setAttribute("aria-hidden", "false");
+    history.replaceState({ view: "home" }, "", "/");
+    render("home", true);
+    requestAnimationFrame(() => {
+      if (minimizeButton instanceof HTMLElement) minimizeButton.focus({ preventScroll: true });
+    });
+    document.dispatchEvent(new CustomEvent("portfolio:restored"));
+  }
+  function minimizePortfolio() {
+    finishPortfolioTransition();
+    document.documentElement.classList.add("has-easter-egg");
+    app.classList.add("is-minimized");
+    app.inert = true;
+    app.setAttribute("aria-hidden", "true");
+    document.dispatchEvent(new CustomEvent("portfolio:easter-egg-open"));
   }
   const routeView = () => { const slug = location.pathname.replace(/^\/+|\/+$/g, "") || "home"; return validViews.has(slug) ? slug : "home"; };
   const pathFor = (view, query = "") => view === "home" ? "/" : view === "search" && query ? `/search?q=${encodeURIComponent(query)}` : `/${view}`;
@@ -167,6 +197,8 @@ const letters = (value) => [...value];
     if (leaving || returning) animateDesktopControls(leaving ? true : false);
     timer = window.setTimeout(() => render(view, focus), reducedMotion.matches ? 0 : leaving ? homeExitDuration : returning ? homeReturnDuration : 150);
   }
+  minimizeButton?.addEventListener("click", minimizePortfolio);
+  document.addEventListener("portfolio:restore-request", restoreHome);
   controls.forEach((control) => control.addEventListener("click", () => { if (control instanceof HTMLElement) navigate(control.dataset.view || "home"); }));
   app.querySelector("[data-airdrop-accept]")?.addEventListener("click", () => navigate("contacts"));
   window.addEventListener("popstate", () => { clearTimeout(timer); render(routeView(), true); });
@@ -233,6 +265,13 @@ const letters = (value) => [...value];
   .is-workspace .monitor-bar,.is-returning-home .monitor-bar{min-height:42px;align-items:center;background:#e7ecea;border-bottom:1px solid rgba(31,38,35,.12)}
   @keyframes crumble{to{opacity:0;transform:translate(calc((var(--i) - 12)*1px),50vh) rotate(calc((var(--i) - 8)*5deg)) scale(.5)}}
   @keyframes restore{from{opacity:0;transform:translate(calc((var(--i) - 24)*1.5vw),-34vh) rotate(calc((var(--i) - 18)*3deg)) scale(.55)}to{opacity:1;transform:none}}
+  .monitor-stage{position:relative;z-index:1;transition:background .28s ease}
+  .monitor-app{transform-origin:left bottom;transition:transform .72s cubic-bezier(.22,.82,.2,1),opacity .44s ease,filter .55s ease,border-radius .55s ease}
+  .monitor-minimize{display:grid;place-items:center;width:24px;height:24px;padding:0;border:1px solid rgba(96,55,0,.24);border-radius:50%;background:#f3ae32;box-shadow:inset 0 1px 1px rgba(255,255,255,.55),0 3px 9px rgba(73,46,0,.2);cursor:pointer;transition:background .16s ease,transform .16s ease}
+  .monitor-minimize span{display:block;width:10px;height:2px;border-radius:99px;background:#5a3700;box-shadow:0 1px 0 rgba(255,255,255,.25)}
+  .monitor-minimize:hover{background:#d99019}.monitor-minimize:active{transform:scale(.92)}.monitor-minimize:focus-visible{outline:3px solid #5f42d9;outline-offset:3px}
+  .has-easter-egg .monitor-stage{z-index:110;background:transparent;pointer-events:none}
+  .has-easter-egg .monitor-app.is-minimized{opacity:0;filter:blur(2px);border-radius:70px;transform:translate(8px,-8px) scale(.13);pointer-events:none}
   @media(max-width:720px){.monitor-stage{padding:6px}.monitor-app{border-radius:18px}.monitor-bar{padding:10px 12px}.hero-copy{left:22px;top:80px;width:calc(100% - 44px)}.hero-copy h1{font-size:clamp(3.5rem,16vw,5.8rem)}.home-search{top:40%;width:74%;}.scattered-folder{width:100px}.folder-stack{width:72px;height:52px}.scattered-folder:nth-child(1){right:10%;bottom:21%}.scattered-folder:nth-child(2){right:8%;top:51%}.scattered-folder:nth-child(3){left:9%;top:45%}.scattered-folder:nth-child(4){left:12%;bottom:9%}.airdrop-card{right:12px;bottom:12px;width:min(250px,70vw);font-size:.78rem}.workspace{inset:38px 0 0;grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) 82px}.workspace-scroll{grid-row:1;padding:24px 18px 42px}.monitor-dock{grid-row:2;flex-direction:row;gap:5px;padding:6px 8px;border-top:1px solid rgba(255,255,255,.7);border-right:0;overflow-x:auto;overflow-y:hidden}.dock-control{flex:0 0 78px;min-height:68px;font-size:.54rem}.dock-control[aria-current=page]{box-shadow:0 4px 15px rgba(0,0,0,.12),inset 0 3px 0 var(--dock-accent,#111)}.dock-icon{width:30px;height:28px}.mini-folder{width:30px;height:21px}.view-header{align-items:flex-start;flex-direction:column}.view-header h2{font-size:clamp(2.7rem,13vw,5rem)}.featured-grid{grid-template-columns:1fr}.media-grid{gap:4px}.contacts-layout{grid-template-columns:1fr}.contact-form{grid-template-columns:1fr}.contact-form label:nth-of-type(4){grid-column:auto}.contact-form button,.contact-form>p{grid-column:auto}.search-result-list button{grid-template-columns:1fr}.search-result-list button span:last-child{display:none}}
   @media(max-width:720px) and (min-height:651px){.scattered-folder:nth-child(1){bottom:27%}.scattered-folder:nth-child(4){left:12%;bottom:22%}.airdrop-card{left:50%;right:auto;bottom:8px;width:min(220px,58vw);font-size:.68rem;transform:translateX(-50%)}.airdrop-card strong{padding:9px 12px 1px}.airdrop-card p{max-height:2.8em;padding:3px 12px 7px;overflow:hidden}.airdrop-card button{padding:8px}.is-leaving-home .airdrop-card{transform:translate(-50%,30px) scale(.2)}}
   @media(max-height:680px) and (min-width:721px){.monitor-dock{gap:2px}.dock-control{min-height:64px}.workspace-scroll{padding-top:26px}.hero-copy{top:85px}.airdrop-card{bottom:18px}.scattered-folder:nth-child(4){bottom:8%}}

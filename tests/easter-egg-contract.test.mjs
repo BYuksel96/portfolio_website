@@ -49,3 +49,12 @@ test("one cleanup path cancels animation, timers, input, speech, and audio", () 
     assert.match(source, new RegExp(token.replace(".", "\\.")));
   }
 });
+
+test("every portfolio route mounts exactly one Easter egg beside the monitor", async () => {
+  for (const path of ["../src/pages/index.astro", "../src/pages/[view].astro"]) {
+    const route = await readFile(new URL(path, import.meta.url), "utf8");
+    assert.match(route, /import EasterEgg from/);
+    assert.match(route, /<PortfolioMonitor[\s\S]*?<EasterEgg handle=\{portfolioContacts\.handle\}/);
+    assert.equal((route.match(/<EasterEgg /g) || []).length, 1);
+  }
+});
