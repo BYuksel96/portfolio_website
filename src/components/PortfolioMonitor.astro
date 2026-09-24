@@ -1,0 +1,280 @@
+---
+// @ts-nocheck
+import { heroLandscapes, profile } from "../data/site.js";
+import { portfolioContacts, portfolioFolders } from "../lib/portfolio-catalog.js";
+const { initialView = "home" } = Astro.props;
+const isHome = initialView === "home";
+const icons = {
+  search: "M11 4a7 7 0 1 0 4.9 12l4.6 4.5 1.4-1.4-4.5-4.6A7 7 0 0 0 11 4Zm0 2a5 5 0 1 1 0 10 5 5 0 0 1 0-10Z",
+  contacts: "M7 3h10a3 3 0 0 1 3 3v14H7a3 3 0 0 1-3-3V6a3 3 0 0 1 3-3Zm2 4a3 3 0 1 0 0 6 3 3 0 0 0 0-6Zm-2 8c-1.3 0-2 .8-2 2v1h8v-1c0-1.2-.7-2-2-2H7Zm9-8h2v2h-2V7Zm0 4h2v2h-2v-2Z",
+  home: "m3 11 9-8 9 8v10h-7v-6h-4v6H3V11Z"
+};
+const letters = (value) => [...value];
+---
+<main class="monitor-stage">
+  <section class={`monitor-app ${isHome ? "is-home" : "is-workspace"}`} data-monitor-app data-initial-view={initialView} data-email={portfolioContacts.email} data-landscapes={JSON.stringify(heroLandscapes.map(({ src }) => src))}>
+    <div class="split-flap-board" aria-hidden="true">
+      {Array.from({ length: 24 }).map(() => <span class="split-flap-tile"><span class="split-flap-card"><span class="split-flap-face split-flap-face-front"></span><span class="split-flap-face split-flap-face-back"></span></span></span>)}
+    </div>
+    <header class="monitor-bar" aria-label="Portfolio status">
+      <button class="monitor-minimize" type="button" data-minimize-monitor aria-label="Minimize portfolio and open game">
+        <span aria-hidden="true"></span>
+      </button><span>{profile.location}</span><span>Portfolio OS</span>
+    </header>
+
+    <section class="home-scene" data-home-scene aria-hidden={!isHome} aria-labelledby="page-title">
+      <div class="hero-copy">
+        <p class="eyebrow" aria-label={portfolioContacts.handle}>{letters(portfolioContacts.handle).map((letter, index) => <span class="crumble-char" style={`--i:${index}`}>{letter}</span>)}</p>
+        <h1 id="page-title" aria-label={portfolioContacts.name}>{portfolioContacts.name.split(" ").map((word, wordIndex) => <span class="crumble-word">{letters(word).map((letter, index) => <span class="crumble-char" style={`--i:${wordIndex * 10 + index}`}>{letter}</span>)}</span>)}</h1>
+        <p aria-label={portfolioContacts.headline}>{letters(portfolioContacts.headline).map((letter, index) => <span class="crumble-char" style={`--i:${index}`}>{letter === " " ? "\u00a0" : letter}</span>)}</p>
+      </div>
+      <form class="home-search" data-home-search role="search">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d={icons.search}></path></svg>
+        <label class="sr-only" for="home-search">Search the portfolio</label>
+        <input id="home-search" type="search" placeholder="Search folders, tags, posts" autocomplete="off" />
+      </form>
+      <nav class="scattered-folders" aria-label="Portfolio folders">
+        {portfolioFolders.map((folder, index) => (
+          <button type="button" class={`scattered-folder folder-${folder.color}`} data-view={folder.slug} style={`--accent:${folder.accent};--folder-index:${index}`}>
+            <span class="folder-stack" aria-hidden="true"><span class="folder-back"></span><span class="folder-previews">{folder.posts.map((post, postIndex) => <span class={`folder-polaroid preview-${postIndex + 1}`}><img src={post.mediaUrl} alt="" /></span>)}</span><span class="folder-front"></span></span>
+            <span>{folder.title}</span>
+          </button>
+        ))}
+      </nav>
+      <aside class="airdrop-card" data-airdrop aria-label="Profile introduction">
+        <strong>AirDrop</strong><p>{portfolioContacts.intro}</p><button type="button" data-airdrop-accept>Accept</button>
+      </aside>
+    </section>
+
+    <div class="workspace" data-workspace aria-hidden={isHome}>
+      <nav class="monitor-dock" aria-label="Portfolio controls">
+        {portfolioFolders.map((folder) => (
+          <button class={`dock-control dock-${folder.color}`} type="button" data-view={folder.slug} aria-current={initialView === folder.slug ? "page" : undefined} style={`--folder-color:${folder.accent}`}>
+            <span class="dock-icon" aria-hidden="true"><span class="folder-stack dock-folder-stack"><span class="folder-back"></span><span class="folder-front"></span></span></span>
+            <span>{folder.title}</span>
+          </button>
+        ))}
+        <button class="dock-control" type="button" data-view="search" aria-current={initialView === "search" ? "page" : undefined}><span class="dock-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d={icons.search}></path></svg></span><span>Search</span></button>
+        <button class="dock-control" type="button" data-view="contacts" aria-current={initialView === "contacts" ? "page" : undefined}><span class="dock-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d={icons.contacts}></path></svg></span><span>Contacts</span></button>
+        <button class="dock-control" type="button" data-view="home"><span class="dock-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d={icons.home}></path></svg></span><span>Home</span></button>
+      </nav>
+      <div class="workspace-scroll" data-workspace-scroll tabindex="-1">
+        {portfolioFolders.map((folder) => (
+          <section class={`portfolio-view view-${folder.color}`} data-panel={folder.slug} style={`--accent:${folder.accent}`} hidden={initialView !== folder.slug}>
+            <header class="view-header"><div><p class="view-kicker">Open folder / {folder.title}</p><h2 tabindex="-1" data-monitor-heading>{folder.title}</h2><p>{folder.description}</p></div><a class="social-link" href={folder.social.url} target="_blank" rel="noreferrer">Visit {folder.social.label} ↗</a></header>
+            <div class="tag-row" aria-label={`${folder.title} disciplines`}>{folder.tags.map((tag) => <span>{tag}</span>)}</div>
+            <section class="latest-preview" aria-label={`${folder.title} latest preview`}><div class="section-label"><span>Latest Preview</span><span>09 files · 3 × 3</span></div>
+              <div class="featured-grid preview-grid">{folder.latestMedia.map((media, index) => <article class="featured-card"><div class="featured-media" style={`--c1:${media.palette[0]};--c2:${media.palette[1]};--c3:${media.palette[2]}`}><img src={media.mediaUrl} alt={media.alt} loading="lazy" /><span>{String(index + 1).padStart(2, "0")}</span></div><div class="featured-copy"><p>{media.type} · {media.date}</p><h3>{media.title}</h3><p>{media.description}</p></div></article>)}</div>
+            </section>
+          </section>
+        ))}
+        <section class="portfolio-view search-view" data-panel="search" hidden={initialView !== "search"}>
+          <header class="view-header"><div><p class="view-kicker">Portfolio index</p><h2 tabindex="-1" data-monitor-heading>Search</h2><p>Search every folder, discipline, caption, and tag.</p></div></header>
+          <form class="workspace-search" data-search-form role="search"><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icons.search}></path></svg><label class="sr-only" for="workspace-search">Search all work</label><input id="workspace-search" name="q" type="search" placeholder="Try “portrait”, “movement”, or “beauty”" autocomplete="off" /></form>
+          <div class="search-results" data-search-results>{portfolioFolders.map((folder) => <section class="search-group" data-search-group data-search-text={`${folder.title} ${folder.description} ${folder.tags.join(" ")}`}><div class="search-group-heading"><span class={`search-folder folder-${folder.color}`} aria-hidden="true"></span><h3>{folder.title}</h3></div><div class="search-result-list">{folder.posts.map((post) => <button type="button" data-view={folder.slug} data-search-result data-search-text={`${folder.title} ${folder.description} ${folder.tags.join(" ")} ${post.title} ${post.type} ${post.description} ${post.tags.join(" ")}`}><span>{post.type}</span><strong>{post.title}</strong><span>Open folder →</span></button>)}</div></section>)}</div>
+          <p class="search-empty" data-search-empty hidden>No work matched that search. Try a folder name, discipline, or tag.</p>
+        </section>
+        <section class="portfolio-view contacts-view" data-panel="contacts" hidden={initialView !== "contacts"}>
+          <header class="view-header"><div><p class="view-kicker">Contacts.app</p><h2 tabindex="-1" data-monitor-heading>Let’s make something.</h2><p>{portfolioContacts.intro}</p></div></header>
+          <div class="contacts-layout"><section class="contact-card"><div class="contact-avatar" aria-hidden="true">C</div><div><p class="eyebrow">{portfolioContacts.handle}</p><h3>{portfolioContacts.name}</h3><p>{portfolioContacts.headline}</p></div><a href={`mailto:${portfolioContacts.email}`}>{portfolioContacts.email}</a>{portfolioContacts.socials.map((social) => <a href={social.url} target="_blank" rel="noreferrer">{social.label} ↗</a>)}</section>
+            <form class="contact-form" data-contact-form><label>Name<input name="name" autocomplete="name" required /></label><label>Email<input name="email" type="email" autocomplete="email" required /></label><label>Project type<select name="project"><option>Photography</option><option>Videography</option><option>Dance</option><option>Eyebrow tattooing</option><option>Something else</option></select></label><label>Tell me about it<textarea name="message" rows="4" required></textarea></label><button type="submit">Compose enquiry <span>↗</span></button><p>This opens your email app with the details ready to send.</p></form>
+          </div>
+          <details class="next-step"><summary>Next step</summary><h3>Make the profile easy to book, share, and trust.</h3><p>Replace the placeholder content with approved creator details, then connect selected social posts and a booking flow for eyebrow tattooing consultations.</p><ul>{portfolioContacts.notes.map((note) => <li>{note}</li>)}</ul></details>
+        </section>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+  // @ts-nocheck
+  const app = document.querySelector("[data-monitor-app]");
+  if (!(app instanceof HTMLElement)) throw new Error("Portfolio monitor failed to initialise");
+  const validViews = new Set(["home", "eyebrow-tattooing", "videography", "photography", "dance", "search", "contacts"]);
+  const panels = [...app.querySelectorAll("[data-panel]")];
+  const controls = [...app.querySelectorAll("[data-view]")];
+  const homeScene = app.querySelector("[data-home-scene]");
+  const workspace = app.querySelector("[data-workspace]");
+  const scroller = app.querySelector("[data-workspace-scroll]");
+  const minimizeButton = app.querySelector("[data-minimize-monitor]");
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const controlMotionDuration = 900;
+  const exitFolderDelay = 1150;
+  const returnFolderDelay = 650;
+  const homeExitDuration = 2150;
+  const homeReturnDuration = 2600;
+  let activeView = app.dataset.initialView || "home";
+  let timer = 0;
+  let controlAnimations = [];
+  function clearControlAnimations() {
+    controlAnimations.forEach((animation) => animation.cancel());
+    controlAnimations = [];
+  }
+  function finishPortfolioTransition() {
+    clearTimeout(timer);
+    clearControlAnimations();
+    app.removeAttribute("aria-busy");
+    app.classList.remove("is-transitioning", "is-leaving-home", "is-returning-home");
+  }
+  function restoreHome() {
+    finishPortfolioTransition();
+    document.documentElement.classList.remove("has-easter-egg");
+    app.classList.remove("is-minimized");
+    app.inert = false;
+    app.setAttribute("aria-hidden", "false");
+    history.replaceState({ view: "home" }, "", "/");
+    render("home", true);
+    requestAnimationFrame(() => {
+      if (minimizeButton instanceof HTMLElement) minimizeButton.focus({ preventScroll: true });
+    });
+    document.dispatchEvent(new CustomEvent("portfolio:restored"));
+  }
+  function minimizePortfolio() {
+    finishPortfolioTransition();
+    document.documentElement.classList.add("has-easter-egg");
+    app.classList.add("is-minimized");
+    app.inert = true;
+    app.setAttribute("aria-hidden", "true");
+    document.dispatchEvent(new CustomEvent("portfolio:easter-egg-open"));
+  }
+  const routeView = () => { const slug = location.pathname.replace(/^\/+|\/+$/g, "") || "home"; return validViews.has(slug) ? slug : "home"; };
+  const pathFor = (view, query = "") => view === "home" ? "/" : view === "search" && query ? `/search?q=${encodeURIComponent(query)}` : `/${view}`;
+
+  function render(view, focus = false) {
+    clearControlAnimations();
+    app.removeAttribute("aria-busy");
+    activeView = view;
+    const home = view === "home";
+    app.classList.toggle("is-home", home); app.classList.toggle("is-workspace", !home);
+    app.classList.remove("is-transitioning", "is-leaving-home", "is-returning-home"); app.dataset.activeView = view;
+    homeScene?.setAttribute("aria-hidden", String(!home)); workspace?.setAttribute("aria-hidden", String(home));
+    homeScene?.toggleAttribute("inert", !home); workspace?.toggleAttribute("inert", home);
+    panels.forEach((panel) => { if (panel instanceof HTMLElement) panel.hidden = panel.dataset.panel !== view; });
+    controls.forEach((control) => { if (!(control instanceof HTMLElement)) return; const current = !home && control.dataset.view === view; control.removeAttribute("aria-current"); if (current) control.setAttribute("aria-current", "page"); });
+    if (scroller instanceof HTMLElement) scroller.scrollTop = 0;
+    if (view === "search") syncQuery();
+    if (focus) { const target = home ? app.querySelector(".scattered-folder") : app.querySelector(`[data-panel="${view}"] [data-monitor-heading]`); if (target instanceof HTMLElement) target.focus({ preventScroll: true }); }
+  }
+  function navigate(view, { push = true, focus = true, query = "" } = {}) {
+  function animateDesktopControls(toDock) {
+    if (reducedMotion.matches) return;
+    clearControlAnimations();
+    const elements = [...app.querySelectorAll(".scattered-folder")];
+    const controlDelay = toDock ? exitFolderDelay : returnFolderDelay;
+    elements.forEach((element) => {
+      if (!(element instanceof HTMLElement)) return;
+      const target = app.querySelector(`.dock-control[data-view="${element.dataset.view}"] .dock-icon`);
+      if (!(target instanceof HTMLElement)) return;
+      const sourceRect = element.getBoundingClientRect();
+      const targetRect = target.getBoundingClientRect();
+      const dx = targetRect.left + targetRect.width / 2 - (sourceRect.left + sourceRect.width / 2);
+      const dy = targetRect.top + targetRect.height / 2 - (sourceRect.top + sourceRect.height / 2);
+      const travel = `translate(${dx}px, ${dy}px) scale(.42)`;
+      const frames = toDock ? [{ transform: "none", opacity: 1 }, { transform: travel, opacity: .9, offset: .82 }, { transform: travel, opacity: 0 }] : [{ transform: travel, opacity: 0 }, { transform: travel, opacity: .9, offset: .18 }, { transform: "none", opacity: 1 }];
+      const animation = element.animate(frames, { duration: controlMotionDuration, delay: controlDelay, easing: "cubic-bezier(.2,.8,.2,1)", fill: "both" });
+      controlAnimations.push(animation);
+    });
+    const searchTarget = app.querySelector('.dock-control[data-view="search"] .dock-icon');
+    const searchElement = app.querySelector("[data-home-search]");
+    if (searchElement instanceof HTMLElement && searchTarget instanceof HTMLElement) {
+      const sourceRect = searchElement.getBoundingClientRect();
+      const targetRect = searchTarget.getBoundingClientRect();
+      const dx = targetRect.left + targetRect.width / 2 - (sourceRect.left + sourceRect.width / 2);
+      const dy = targetRect.top + targetRect.height / 2 - (sourceRect.top + sourceRect.height / 2);
+      const travel = `translateX(-50%) translate(${dx}px, ${dy}px) scale(.18)`;
+      const frames = toDock ? [{ transform: "translateX(-50%)", opacity: 1 }, { transform: travel, opacity: .9, offset: .82 }, { transform: travel, opacity: 0 }] : [{ transform: travel, opacity: 0 }, { transform: travel, opacity: .9, offset: .18 }, { transform: "translateX(-50%)", opacity: 1 }];
+      const animation = searchElement.animate(frames, { duration: controlMotionDuration, delay: controlDelay, easing: "cubic-bezier(.2,.8,.2,1)", fill: "both" });
+      controlAnimations.push(animation);
+    }
+  }
+    if (!validViews.has(view) || (view === activeView && view !== "search")) return;
+    homeScene?.setAttribute("inert", "");
+    workspace?.setAttribute("inert", "");
+    app.setAttribute("aria-busy", "true");
+    clearTimeout(timer); const leaving = activeView === "home" && view !== "home"; const returning = activeView !== "home" && view === "home";
+    app.classList.add("is-transitioning"); app.classList.toggle("is-leaving-home", leaving); app.classList.toggle("is-returning-home", returning);
+    if (push) history.pushState({ view }, "", pathFor(view, query));
+    if (leaving || returning) animateDesktopControls(leaving ? true : false);
+    timer = window.setTimeout(() => render(view, focus), reducedMotion.matches ? 0 : leaving ? homeExitDuration : returning ? homeReturnDuration : 150);
+  }
+  minimizeButton?.addEventListener("click", minimizePortfolio);
+  document.addEventListener("portfolio:restore-request", restoreHome);
+  controls.forEach((control) => control.addEventListener("click", () => { if (control instanceof HTMLElement) navigate(control.dataset.view || "home"); }));
+  app.querySelector("[data-airdrop-accept]")?.addEventListener("click", () => navigate("contacts"));
+  window.addEventListener("popstate", () => { clearTimeout(timer); render(routeView(), true); });
+
+  const homeSearch = app.querySelector("[data-home-search]");
+  homeSearch?.addEventListener("submit", (event) => { event.preventDefault(); const input = homeSearch.querySelector("input"); const query = input instanceof HTMLInputElement ? input.value.trim() : ""; navigate("search", { query }); });
+  const searchInput = app.querySelector("#workspace-search"); const groups = [...app.querySelectorAll("[data-search-group]")]; const empty = app.querySelector("[data-search-empty]");
+  function filter(query) { const value = query.toLowerCase().trim(); let visible = 0; groups.forEach((group) => { if (!(group instanceof HTMLElement)) return; let count = 0; group.querySelectorAll("[data-search-result]").forEach((result) => { if (!(result instanceof HTMLElement)) return; const match = !value || (result.dataset.searchText || "").toLowerCase().includes(value); result.hidden = !match; if (match) count++; }); group.hidden = count === 0; visible += count; }); if (empty instanceof HTMLElement) empty.hidden = visible > 0; }
+  function setQuery(value) { if (!(searchInput instanceof HTMLInputElement)) return; searchInput.value = value; filter(value); searchInput.focus(); }
+  function syncQuery() { setQuery(new URLSearchParams(location.search).get("q") || ""); }
+  searchInput?.addEventListener("input", () => { if (!(searchInput instanceof HTMLInputElement)) return; filter(searchInput.value); history.replaceState({ view: "search" }, "", pathFor("search", searchInput.value.trim())); });
+  app.querySelector("[data-search-form]")?.addEventListener("submit", (event) => event.preventDefault());
+  const form = app.querySelector("[data-contact-form]");
+  form?.addEventListener("submit", (event) => { event.preventDefault(); if (!(form instanceof HTMLFormElement) || !form.reportValidity()) return; const data = new FormData(form); const subject = `${data.get("project")} enquiry from ${data.get("name")}`; const body = `Name: ${data.get("name")}\nEmail: ${data.get("email")}\nProject: ${data.get("project")}\n\n${data.get("message")}`; location.href = `mailto:${app.dataset.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`; });
+
+  const tiles = [...app.querySelectorAll(".split-flap-tile")]; const images = JSON.parse(app.dataset.landscapes || "[]");
+  function face(tile, selector, source, index) { const item = tile.querySelector(selector); if (!(item instanceof HTMLElement)) return; item.style.backgroundImage = `url("${source}")`; item.style.backgroundSize = `${tiles.length * 100}% 100%`; item.style.backgroundPosition = `${index / Math.max(1, tiles.length - 1) * 100}% center`; }
+  if (images.length && tiles.length) tiles.forEach((tile, index) => face(tile, ".split-flap-face-front", images[0], index));
+  if (images.length > 1 && tiles.length && !reducedMotion.matches) { let current = 0; const cycle = () => { const next = (current + 1) % images.length; tiles.forEach((tile, index) => setTimeout(() => { face(tile, ".split-flap-face-back", images[next], index); tile.classList.add("is-flipping"); setTimeout(() => { face(tile, ".split-flap-face-front", images[next], index); tile.classList.add("is-resetting"); tile.classList.remove("is-flipping"); requestAnimationFrame(() => requestAnimationFrame(() => tile.classList.remove("is-resetting"))); }, 760); }, index * 70)); current = next; setTimeout(cycle, tiles.length * 70 + 5700); }; setTimeout(cycle, 5000); }
+  render(routeView()); if (routeView() === "search") syncQuery();
+</script>
+
+<style is:global>
+  .monitor-stage{height:100svh;padding:clamp(6px,1.4vw,22px);overflow:hidden;background:radial-gradient(circle at 15% 20%,#d5eff5,transparent 26%),radial-gradient(circle at 84% 15%,#fff0c4,transparent 30%),#dfe7e3}
+  .monitor-app{position:relative;height:100%;min-height:0;overflow:hidden;border:1px solid rgba(255,255,255,.8);border-radius:clamp(18px,2vw,30px);background:rgba(255,255,255,.2);box-shadow:0 24px 80px rgba(17,22,20,.2);isolation:isolate}
+  .split-flap-board{position:absolute;inset:0;z-index:-2;display:grid;grid-template-columns:repeat(24,1fr);overflow:hidden;opacity:.44;perspective:1200px}
+  .split-flap-board:after{position:absolute;inset:0;content:"";background:linear-gradient(90deg,rgba(255,255,255,.7),rgba(255,255,255,.2) 45%,rgba(255,255,255,.55)),repeating-linear-gradient(90deg,transparent 0,transparent calc(100%/24 - 1px),#fff calc(100%/24 - 1px),#fff calc(100%/24));pointer-events:none}
+  .split-flap-tile,.split-flap-card,.split-flap-face{position:relative;display:block;height:100%}.split-flap-card,.split-flap-face{position:absolute;inset:0}.split-flap-card{transform-style:preserve-3d;transition:transform .76s cubic-bezier(.32,.02,.2,1)}.split-flap-face{background-repeat:no-repeat;backface-visibility:hidden}.split-flap-face-back{transform:rotateY(180deg)}.split-flap-tile.is-flipping .split-flap-card{transform:rotateY(180deg)}.split-flap-tile.is-resetting .split-flap-card{transition:none}
+  .monitor-bar{position:absolute;inset:0 0 auto;z-index:20;display:flex;justify-content:space-between;padding:12px 18px;color:#292d2b;font-size:.72rem;font-weight:800}.window-dots{display:flex;gap:6px}.window-dots i{width:10px;height:10px;border-radius:50%;background:#252827}
+  .home-scene{position:absolute;inset:0;transition:opacity .24s ease}.is-workspace .home-scene{opacity:0;visibility:hidden;pointer-events:none}.is-returning-home .home-scene{opacity:1;visibility:visible;pointer-events:none}.hero-copy{position:absolute;z-index:3;left:clamp(28px,5vw,92px);top:clamp(100px,17vh,180px);width:min(44vw,690px)}.eyebrow{margin:0 0 12px;color:#505653;font-size:.72rem;font-weight:850;text-transform:uppercase}.hero-copy h1{margin:0;color:#fff;font-size:clamp(5rem,9vw,10rem);line-height:.84;letter-spacing:-.07em;text-shadow:0 12px 38px rgba(0,0,0,.22)}.hero-copy>p:last-child{max-width:450px;margin:22px 0 0;font-size:clamp(.95rem,1.15vw,1.2rem);font-weight:650;line-height:1.45}.crumble-word{display:inline-block;white-space:nowrap}.crumble-word:not(:last-child){margin-right:.16em}.crumble-char{display:inline-block;white-space:pre}.is-leaving-home .crumble-char{animation:crumble .55s cubic-bezier(.55,.04,.95,.35) both;animation-delay:calc(var(--i)*9ms)}.is-returning-home .crumble-char{animation:restore .5s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i)*7ms)}
+  .is-returning-home .home-scene{z-index:9}
+  .home-search{position:absolute;z-index:5;top:13%;left:50%;display:flex;align-items:center;gap:10px;width:min(390px,31vw);min-height:52px;padding:8px 16px;border:2px solid #181818;border-radius:999px;background:#fff;transform:translateX(-50%);box-shadow:0 12px 26px rgba(0,0,0,.12);transition:.5s cubic-bezier(.2,.8,.2,1)}.home-search svg,.workspace-search svg,.dock-icon svg{width:22px;fill:currentColor}.home-search input,.workspace-search input{width:100%;border:0;outline:0;background:transparent}
+  .scattered-folders{position:absolute;inset:0;z-index:4}.scattered-folder{--folder-color:var(--accent);position:absolute;display:grid;justify-items:center;gap:9px;width:140px;border:0;background:transparent;color:#171717;font-size:.82rem;font-weight:650;cursor:pointer;transition:transform .52s cubic-bezier(.2,.8,.2,1),opacity .3s}.scattered-folder:nth-child(1){right:24%;bottom:20%}.scattered-folder:nth-child(2){right:11%;top:30%}.scattered-folder:nth-child(3){left:42%;top:29%}.scattered-folder:nth-child(4){left:24%;bottom:16%}.folder-stack{position:relative;width:100px;height:72px}.folder-back,.folder-front{position:absolute;inset:0;border-radius:7px;background:color-mix(in srgb,var(--folder-color) 80%,white);box-shadow:0 12px 25px rgba(0,0,0,.15)}.folder-back:before,.mini-folder:before,.search-folder:before{position:absolute;top:-10px;left:0;width:38px;height:14px;border-radius:6px 6px 0 0;background:inherit;content:""}.folder-front{z-index:3;top:15px;background:var(--folder-color);transform-origin:top;transition:transform .25s}.folder-previews{position:absolute;inset:0;z-index:2}.folder-polaroid{position:absolute;left:35px;bottom:8px;width:40px;height:52px;padding:3px;background:#fff;box-shadow:0 7px 14px rgba(0,0,0,.16);opacity:0;transition:.25s}.folder-polaroid img{width:100%;height:38px;object-fit:cover}.scattered-folder:hover .folder-front,.scattered-folder:focus-visible .folder-front{transform:rotateX(22deg)}.scattered-folder:hover .folder-polaroid,.scattered-folder:focus-visible .folder-polaroid{opacity:1}.scattered-folder:hover .preview-1,.scattered-folder:focus-visible .preview-1{transform:translate(-24px,-18px) rotate(-15deg)}.scattered-folder:hover .preview-2,.scattered-folder:focus-visible .preview-2{transform:translate(0,-28px)}.scattered-folder:hover .preview-3,.scattered-folder:focus-visible .preview-3{transform:translate(24px,-18px) rotate(15deg)}
+  @media(min-width:721px){.scattered-folder:nth-child(1){right:33%}}
+  .airdrop-card{position:absolute;z-index:6;right:clamp(20px,6vw,100px);bottom:clamp(24px,7vh,82px);width:min(300px,25vw);overflow:hidden;border:1px solid rgba(0,0,0,.12);border-radius:18px;background:rgba(255,255,255,.87);text-align:center;box-shadow:0 18px 48px rgba(0,0,0,.18);backdrop-filter:blur(18px);transition:.42s}.airdrop-card strong{display:block;padding:16px 18px 2px}.airdrop-card p{margin:0;padding:5px 20px 16px;color:#666;line-height:1.42}.airdrop-card button{width:100%;padding:13px;border:0;border-top:1px solid #ddd;background:transparent;color:#0967d7;font-weight:850;cursor:pointer}.is-leaving-home .airdrop-card{opacity:0;transform:translate(40px,40px) rotate(8deg) scale(.2)}
+  .workspace{position:absolute;inset:42px 0 0;z-index:8;display:grid;grid-template-columns:118px minmax(0,1fr);min-height:0;opacity:0;pointer-events:none;transform:translateY(12px);transition:.35s ease}.is-workspace .workspace,.is-returning-home .workspace{opacity:1;pointer-events:auto;transform:none}.is-home .workspace{visibility:hidden}.monitor-dock{display:flex;flex-direction:column;gap:7px;min-height:0;padding:12px 9px 14px;border-right:1px solid rgba(255,255,255,.55);background:rgba(242,246,244,.72);backdrop-filter:blur(24px);overflow-y:auto}.dock-control{display:grid;place-items:center;gap:4px;min-height:78px;padding:7px 5px;border:1px solid transparent;border-radius:14px;background:transparent;color:#282b2a;font-size:.61rem;font-weight:750;line-height:1.1;text-align:center;cursor:pointer}.dock-control:hover{background:rgba(255,255,255,.55)}.dock-control[aria-current=page]{border-color:rgba(0,0,0,.25);background:#fff;box-shadow:0 8px 20px rgba(0,0,0,.12),inset 4px 0 0 var(--dock-accent,#111)}.dock-icon{display:grid;place-items:center;width:38px;height:36px;border-radius:10px;background:rgba(255,255,255,.75)}.mini-folder{position:relative;width:38px;height:26px;border-radius:5px;background:#aaa}.dock-yellow{--dock-accent:#f4c84a}.dock-yellow .mini-folder{background:#f4c84a}.dock-green{--dock-accent:#9dc56e}.dock-green .mini-folder{background:#9dc56e}.dock-blue{--dock-accent:#48b6ff}.dock-blue .mini-folder{background:#48b6ff}.dock-pink{--dock-accent:#f07291}.dock-pink .mini-folder{background:#f07291}
+  .workspace-scroll{min-width:0;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:clamp(20px,4vw,62px);background:rgba(248,248,245,.87);scrollbar-color:#a8aba8 transparent}.portfolio-view{width:min(1120px,100%);margin:0 auto;padding-bottom:56px}.view-header{display:flex;align-items:flex-end;justify-content:space-between;gap:30px;padding-bottom:22px;border-bottom:1px solid rgba(0,0,0,.15)}.view-kicker,.section-label{margin:0 0 10px;color:#626765;font-size:.68rem;font-weight:850;letter-spacing:.08em;text-transform:uppercase}.view-header h2{max-width:12ch;margin:0;font-size:clamp(3rem,6.5vw,7rem);line-height:.86;letter-spacing:-.065em}.view-header p:last-child{max-width:590px;margin:18px 0 0;color:#555d59;line-height:1.55}.social-link{flex:none;padding:12px 15px;border:1px solid #222;border-radius:999px;font-weight:800;text-decoration:none}.tag-row{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 36px}.tag-row span{padding:7px 11px;border:1px solid rgba(0,0,0,.15);border-radius:999px;background:rgba(255,255,255,.7);font-size:.75rem;font-weight:750}.section-label{display:flex;justify-content:space-between;margin-bottom:12px}.featured-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.featured-card{overflow:hidden;border:1px solid rgba(0,0,0,.14);border-radius:9px;background:rgba(255,255,255,.7);box-shadow:0 12px 30px rgba(0,0,0,.07)}.featured-media{position:relative;aspect-ratio:4/3;overflow:hidden;background:linear-gradient(135deg,var(--c1),transparent),linear-gradient(45deg,var(--c2),var(--c3))}.featured-media img,.media-grid img{width:100%;height:100%;object-fit:cover}.featured-media>span{position:absolute;right:10px;bottom:8px;color:#fff;font-size:1.6rem;font-weight:900;text-shadow:0 2px 8px #000}.featured-copy{padding:15px}.featured-copy>p:first-child{margin:0 0 8px;color:#777;font-size:.68rem;font-weight:800;text-transform:uppercase}.featured-copy h3{margin:0 0 8px}.featured-copy>p:last-child{margin:0;color:#606561;font-size:.86rem;line-height:1.45}.latest-work{margin-top:42px}.media-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.media-grid figure{position:relative;aspect-ratio:1;margin:0;overflow:hidden;background:#ddd}.media-grid figcaption{position:absolute;right:8px;bottom:7px;padding:3px 5px;background:rgba(0,0,0,.6);color:#fff;font-size:.62rem}
+  .workspace-search{display:flex;align-items:center;gap:12px;margin:28px 0;padding:14px 17px;border:2px solid #171717;border-radius:999px;background:#fff}.search-results{display:grid;gap:14px}.search-group{padding:18px;border:1px solid rgba(0,0,0,.14);border-radius:12px;background:rgba(255,255,255,.65)}.search-group-heading{display:flex;align-items:center;gap:12px;margin-bottom:12px}.search-group-heading h3{margin:0}.search-folder{position:relative;width:34px;height:24px;border-radius:4px;background:#aaa}.search-folder.folder-yellow{background:#f4c84a}.search-folder.folder-green{background:#9dc56e}.search-folder.folder-blue{background:#48b6ff}.search-folder.folder-pink{background:#f07291}.search-result-list{display:grid}.search-result-list button{display:grid;grid-template-columns:100px 1fr auto;gap:12px;padding:13px 4px;border:0;border-top:1px solid rgba(0,0,0,.1);background:transparent;text-align:left;cursor:pointer}.search-result-list button:hover{color:#0967d7}.search-empty{padding:40px;text-align:center}
+  .contacts-layout{display:grid;grid-template-columns:.8fr 1.2fr;gap:22px;margin-top:30px}.contact-card,.contact-form,.next-step{padding:22px;border:1px solid rgba(0,0,0,.14);border-radius:14px;background:rgba(255,255,255,.7)}.contact-card{display:flex;flex-direction:column;gap:13px}.contact-card h3{margin:0;font-size:1.8rem}.contact-card p{color:#606561;line-height:1.45}.contact-card a{font-weight:800;text-underline-offset:4px}.contact-avatar{display:grid;place-items:center;width:72px;height:72px;border-radius:50%;background:#111;color:#fff;font-size:2rem;font-weight:900}.contact-form{display:grid;grid-template-columns:1fr 1fr;gap:14px}.contact-form label{display:grid;gap:7px;font-size:.72rem;font-weight:800}.contact-form label:nth-of-type(4){grid-column:1/-1}.contact-form input,.contact-form select,.contact-form textarea{width:100%;padding:11px;border:1px solid #bbb;border-radius:7px;background:#fff}.contact-form button{grid-column:1/-1;display:flex;justify-content:space-between;padding:14px;border:0;border-radius:8px;background:#111;color:#fff;font-weight:850;cursor:pointer}.contact-form>p{grid-column:1/-1;margin:0;color:#777;font-size:.72rem}.next-step{margin-top:18px;color:#5d625f}.next-step summary{color:#171717;font-weight:850;cursor:pointer}.next-step h3{color:#171717}
+  .dock-icon .dock-folder-stack{width:32px;height:23px}
+  .dock-folder-stack .folder-back,.dock-folder-stack .folder-front{border-radius:4px;box-shadow:0 5px 10px rgba(0,0,0,.14)}
+  .dock-folder-stack .folder-back:before{top:-4px;width:13px;height:6px;border-radius:3px 3px 0 0}
+  .dock-folder-stack .folder-front{top:6px}
+  .airdrop-card{--airdrop-rest-transform:translateX(0)}
+  .is-transitioning .home-scene,.is-transitioning .workspace{pointer-events:none}
+  .is-leaving-home .home-scene{z-index:10}
+  .is-leaving-home .crumble-char{animation:crumble .65s cubic-bezier(.55,.04,.95,.35) both;animation-delay:calc(var(--i)*6ms)}
+  .is-leaving-home .airdrop-card{animation:airdrop-drop .55s .75s cubic-bezier(.58,.08,1,.44) both}
+  .is-leaving-home .workspace{visibility:visible;pointer-events:none;animation:workspace-reveal .5s 1.45s ease both}
+  .is-returning-home .workspace{pointer-events:none}
+  .is-returning-home .workspace-scroll{animation:workspace-drop .65s cubic-bezier(.58,.08,1,.44) both}
+  .is-returning-home .monitor-dock{animation:dock-dismiss .3s 1.45s ease both}
+  .is-returning-home .monitor-bar{animation:bar-clear .3s 1.45s ease both}
+  .is-returning-home .crumble-char{animation:restore .7s cubic-bezier(.16,.82,.22,1) both;animation-delay:calc(1650ms + var(--i)*2ms)}
+  .is-returning-home .airdrop-card{animation:airdrop-land .85s 1.55s cubic-bezier(.16,.86,.24,1) both}
+  @keyframes airdrop-drop{from{opacity:1;transform:var(--airdrop-rest-transform,translateX(0))}18%{transform:var(--airdrop-rest-transform,translateX(0)) translateY(-8px) rotate(-1deg)}82%{opacity:1}to{opacity:0;transform:var(--airdrop-rest-transform,translateX(0)) translateY(115vh) rotate(13deg)}}
+  @keyframes workspace-drop{from{opacity:1;transform:none}18%{transform:translateY(-10px)}80%{opacity:1}to{opacity:0;transform:translateY(115vh) rotate(2deg)}}
+  @keyframes workspace-reveal{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+  @keyframes dock-dismiss{from{opacity:1;transform:none}to{opacity:0;transform:translateX(-115%)}}
+  @keyframes bar-clear{from{background:#e7ecea;border-bottom-color:rgba(31,38,35,.12)}to{background:transparent;border-bottom-color:transparent}}
+  @keyframes airdrop-land{from{opacity:0;transform:var(--airdrop-rest-transform,translateX(0)) translate(70vw,-24vh) rotate(-14deg) scale(.7)}72%{opacity:1;transform:var(--airdrop-rest-transform,translateX(0)) translate(-12px,4px) rotate(1deg) scale(1.02)}to{opacity:1;transform:var(--airdrop-rest-transform,translateX(0))}}
+  @media(max-width:720px) and (min-height:651px),(max-width:480px) and (max-height:650px){.airdrop-card{--airdrop-rest-transform:translateX(-50%)}}
+  .view-header p:last-child{margin:26px 0 0}
+  .is-workspace .monitor-bar,.is-returning-home .monitor-bar{min-height:42px;align-items:center;background:#e7ecea;border-bottom:1px solid rgba(31,38,35,.12)}
+  @keyframes crumble{to{opacity:0;transform:translate(calc((var(--i) - 12)*1px),50vh) rotate(calc((var(--i) - 8)*5deg)) scale(.5)}}
+  @keyframes restore{from{opacity:0;transform:translate(calc((var(--i) - 24)*1.5vw),-34vh) rotate(calc((var(--i) - 18)*3deg)) scale(.55)}to{opacity:1;transform:none}}
+  .monitor-stage{position:relative;z-index:1;transition:background .28s ease}
+  .monitor-app{transform-origin:left bottom;transition:transform .72s cubic-bezier(.22,.82,.2,1),opacity .44s ease,filter .55s ease,border-radius .55s ease}
+  .monitor-minimize{display:grid;place-items:center;width:24px;height:24px;padding:0;border:1px solid rgba(96,55,0,.24);border-radius:50%;background:#f3ae32;box-shadow:inset 0 1px 1px rgba(255,255,255,.55),0 3px 9px rgba(73,46,0,.2);cursor:pointer;transition:background .16s ease,transform .16s ease}
+  .monitor-minimize span{display:block;width:10px;height:2px;border-radius:99px;background:#5a3700;box-shadow:0 1px 0 rgba(255,255,255,.25)}
+  .monitor-minimize:hover{background:#d99019}.monitor-minimize:active{transform:scale(.92)}.monitor-minimize:focus-visible{outline:3px solid #5f42d9;outline-offset:3px}
+  .has-easter-egg .monitor-stage{z-index:110;background:transparent;pointer-events:none}
+  .has-easter-egg .monitor-app.is-minimized{opacity:0;filter:blur(2px);border-radius:70px;transform:translate(8px,-8px) scale(.13);pointer-events:none}
+  @media(max-width:720px){.monitor-stage{padding:6px}.monitor-app{border-radius:18px}.monitor-bar{padding:10px 12px}.hero-copy{left:22px;top:80px;width:calc(100% - 44px)}.hero-copy h1{font-size:clamp(3.5rem,16vw,5.8rem)}.home-search{top:40%;width:74%;}.scattered-folder{width:100px}.folder-stack{width:72px;height:52px}.scattered-folder:nth-child(1){right:10%;bottom:21%}.scattered-folder:nth-child(2){right:8%;top:51%}.scattered-folder:nth-child(3){left:9%;top:45%}.scattered-folder:nth-child(4){left:12%;bottom:9%}.airdrop-card{right:12px;bottom:12px;width:min(250px,70vw);font-size:.78rem}.workspace{inset:38px 0 0;grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) 82px}.workspace-scroll{grid-row:1;padding:24px 18px 42px}.monitor-dock{grid-row:2;flex-direction:row;gap:5px;padding:6px 8px;border-top:1px solid rgba(255,255,255,.7);border-right:0;overflow-x:auto;overflow-y:hidden}.dock-control{flex:0 0 78px;min-height:68px;font-size:.54rem}.dock-control[aria-current=page]{box-shadow:0 4px 15px rgba(0,0,0,.12),inset 0 3px 0 var(--dock-accent,#111)}.dock-icon{width:30px;height:28px}.mini-folder{width:30px;height:21px}.view-header{align-items:flex-start;flex-direction:column}.view-header h2{font-size:clamp(2.7rem,13vw,5rem)}.featured-grid{grid-template-columns:1fr}.media-grid{gap:4px}.contacts-layout{grid-template-columns:1fr}.contact-form{grid-template-columns:1fr}.contact-form label:nth-of-type(4){grid-column:auto}.contact-form button,.contact-form>p{grid-column:auto}.search-result-list button{grid-template-columns:1fr}.search-result-list button span:last-child{display:none}}
+  @media(max-width:720px) and (min-height:651px){.scattered-folder:nth-child(1){bottom:27%}.scattered-folder:nth-child(4){left:12%;bottom:22%}.airdrop-card{left:50%;right:auto;bottom:8px;width:min(220px,58vw);font-size:.68rem;transform:translateX(-50%)}.airdrop-card strong{padding:9px 12px 1px}.airdrop-card p{max-height:2.8em;padding:3px 12px 7px;overflow:hidden}.airdrop-card button{padding:8px}.is-leaving-home .airdrop-card{transform:translate(-50%,30px) scale(.2)}}
+  @media(max-height:680px) and (min-width:721px){.monitor-dock{gap:2px}.dock-control{min-height:64px}.workspace-scroll{padding-top:26px}.hero-copy{top:85px}.airdrop-card{bottom:18px}.scattered-folder:nth-child(4){bottom:8%}}
+  @media(max-width:480px) and (max-height:650px){.hero-copy{left:16px;top:54px;width:calc(100% - 32px)}.hero-copy h1{font-size:clamp(2.8rem,15vw,3.7rem)}.hero-copy>p:last-child{max-width:75%;margin-top:10px;font-size:.76rem;line-height:1.3}.home-search{top:34%;width:74%;min-height:42px}.scattered-folder{width:78px;font-size:.65rem}.folder-stack{width:58px;height:42px}.scattered-folder:nth-child(1){right:5%;top:45%;bottom:auto}.scattered-folder:nth-child(2){right:5%;top:64%}.scattered-folder:nth-child(3){left:5%;top:45%}.scattered-folder:nth-child(4){left:5%;top:64%;bottom:auto}.airdrop-card{left:50%;right:auto;bottom:6px;width:min(210px,66vw);font-size:.62rem;transform:translateX(-50%)}.airdrop-card strong{padding:7px 10px 1px}.airdrop-card p{max-height:2.8em;padding:2px 10px 6px;overflow:hidden}.airdrop-card button{padding:7px}.is-leaving-home .airdrop-card{transform:translate(-50%,30px) scale(.2)}}
+  @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}.split-flap-card{transform:none!important}}
+</style>
