@@ -29,7 +29,7 @@ web_design/             Supplied visual reference screenshots
 
 ## Before You Start
 
-Install Node.js version 20 or newer. This machine currently has Node installed.
+Install Node.js version 22.12.0 or newer. Astro 7 requires this version or newer.
 
 On Windows PowerShell, use `npm.cmd` instead of `npm` if script execution is blocked.
 
