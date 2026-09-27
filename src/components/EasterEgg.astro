@@ -75,6 +75,7 @@ const { handle = "@CREATORHANDLE" } = Astro.props;
     stepGame,
   } from "../lib/head-game.js";
   import { loadHighScore, saveHighScore } from "../lib/easter-egg-storage.js";
+  import { chooseCatchSound } from "../lib/catch-sound.js";
 
   const root = document.querySelector("[data-easter-egg]");
   if (!(root instanceof HTMLElement)) throw new Error("Easter egg failed to initialise");
@@ -84,14 +85,20 @@ const { handle = "@CREATORHANDLE" } = Astro.props;
     gold: "/assets/easter-egg/gold-sprite.webp",
     open: "/assets/easter-egg/head-open.webp",
     closed: "/assets/easter-egg/head-closed.webp",
+    yummy: "/assets/easter-egg/yummy_g.MP3",
+    ugh: "/assets/easter-egg/ugh_g.MP3",
   });
   const images = Object.fromEntries(
-    Object.entries(ASSETS).map(([key, source]) => {
+    Object.entries(ASSETS).filter(([key]) => key !== "yummy" && key !== "ugh").map(([key, source]) => {
       const image = new Image();
       image.src = source;
       return [key, image];
     }),
   );
+  const catchSounds = {
+    yummy: new Audio(ASSETS.yummy),
+    ugh: new Audio(ASSETS.ugh),
+  };
   const screens = [...root.querySelectorAll("[data-screen]")];
   const passcodeForm = root.querySelector("[data-passcode-form]");
   const passcodeInput = root.querySelector("[data-passcode-input]");
@@ -125,6 +132,7 @@ const { handle = "@CREATORHANDLE" } = Astro.props;
   let sessionToken = 0;
   let oscillator = null;
   let audioContext = null;
+  let activeCatchSound = null;
   let highScore = (() => {
     try { return loadHighScore(window.localStorage); } catch { return 0; }
   })();
@@ -193,13 +201,20 @@ const { handle = "@CREATORHANDLE" } = Astro.props;
     alarmTimer = window.setTimeout(clearAlarm, 2000);
   }
 
-  function sayYummy() {
-    if (muted || !("speechSynthesis" in window)) return;
-    speechSynthesis.cancel();
-    const cue = new SpeechSynthesisUtterance("Yummy");
-    cue.rate = 1.15;
-    cue.pitch = 1.12;
-    speechSynthesis.speak(cue);
+  function stopCatchSound() {
+    if (!activeCatchSound) return;
+    activeCatchSound.pause();
+    activeCatchSound.currentTime = 0;
+    activeCatchSound = null;
+  }
+
+  function playCatchSound() {
+    if (muted) return;
+    stopCatchSound();
+    const sound = catchSounds[chooseCatchSound()];
+    activeCatchSound = sound;
+    sound.currentTime = 0;
+    sound.play().catch(() => {});
   }
 
   function resizeCanvas() {
@@ -276,7 +291,7 @@ const { handle = "@CREATORHANDLE" } = Astro.props;
         clearTimeout(mouthTimer);
         mouthTimer = window.setTimeout(() => { mouthClosed = false; }, 180);
         flashBonus(effect.value);
-        sayYummy();
+        playCatchSound();
       } else if (effect.type === "miss") {
         root.classList.remove("has-edge-pulse", "is-shaking");
         requestAnimationFrame(() => root.classList.add("has-edge-pulse", "is-shaking"));
@@ -337,7 +352,7 @@ const { handle = "@CREATORHANDLE" } = Astro.props;
     clearTimeout(bonusTimer);
     heldKeys.clear();
     dragging = false;
-    if ("speechSynthesis" in window) speechSynthesis.cancel();
+    stopCatchSound();
     stopOscillator();
     closeAudioContext();
     game = null;
@@ -401,7 +416,7 @@ const { handle = "@CREATORHANDLE" } = Astro.props;
     muteButton.setAttribute("aria-pressed", String(muted));
     muteButton.textContent = muted ? "Muted" : "Sound on";
     if (muted) {
-      if ("speechSynthesis" in window) speechSynthesis.cancel();
+      stopCatchSound();
       stopOscillator();
     }
   });

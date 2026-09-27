@@ -36,13 +36,13 @@ test("assets are centralized and head frames share one render box", () => {
   }
 });
 
-test("one cleanup path cancels animation, timers, input, speech, and audio", () => {
+test("one cleanup path cancels animation, timers, input, and audio", () => {
   assert.match(source, /function cleanupSession/);
   for (const token of [
     "cancelAnimationFrame",
     "clearTimeout",
     "heldKeys.clear",
-    "speechSynthesis.cancel",
+    "stopCatchSound",
     "oscillator",
     "audioContext.close",
     "sessionToken",
