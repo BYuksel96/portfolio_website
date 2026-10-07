@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
+import { portfolioFolders } from "../src/lib/portfolio-catalog.js";
 
 const component = await readFile(new URL("../src/components/PortfolioMonitor.astro", import.meta.url), "utf8");
-const catalog = await readFile(new URL("../src/lib/portfolio-catalog.js", import.meta.url), "utf8");
 
 test("dock folder controls reuse the layered Home folder artwork", () => {
   assert.match(component, /class="folder-stack dock-folder-stack"/);
@@ -11,13 +11,17 @@ test("dock folder controls reuse the layered Home folder artwork", () => {
   assert.doesNotMatch(component, /class="dock-icon mini-folder"/);
 });
 
-test("every folder renders one nine-card Latest Preview grid", () => {
+test("every folder supplies up to nine Latest Preview entries with usable copy", () => {
   assert.match(component, />Latest Preview</);
-  assert.match(component, /folder\.latestMedia\.map\(\(media, index\) => <article class="featured-card"/);
   assert.doesNotMatch(component, />Selected Work</);
   assert.doesNotMatch(component, />Latest contact sheet</);
-  for (const field of ["title", "type", "date", "description"]) {
-    assert.match(catalog, new RegExp(`${field}: post\\.${field}`));
+  for (const folder of portfolioFolders) {
+    assert.ok(folder.latestMedia.length > 0 && folder.latestMedia.length <= 9);
+    for (const media of folder.latestMedia) {
+      assert.equal(typeof media.title, "string");
+      assert.equal(typeof media.date, "string");
+      assert.equal(typeof media.description, "string");
+    }
   }
 });
 

@@ -1,0 +1,86 @@
+---
+interface Props {
+  media: { permalink: string; alt: string; slides: { mediaUrl: string }[] };
+  index: number;
+}
+const { media, index } = Astro.props;
+const slides = media.slides;
+---
+<div class="social-carousel" data-social-carousel role="region" aria-roledescription="carousel" aria-label={`Post ${index + 1} image carousel`} tabindex="0">
+  {slides.map((slide, slideIndex) => <a class="media-link carousel-slide" data-carousel-slide href={media.permalink} target="_blank" rel="noopener noreferrer" aria-label={`Open image ${slideIndex + 1} of ${slides.length} on Instagram`} hidden={slideIndex > 0}>
+    <img src={slideIndex === 0 ? slide.mediaUrl : undefined} data-src={slide.mediaUrl} alt={`${media.alt} — image ${slideIndex + 1} of ${slides.length}`} loading="lazy" draggable="false" />
+  </a>)}
+  <button class="carousel-arrow previous" data-carousel-previous type="button" aria-label="Previous image"><span aria-hidden="true">‹</span></button>
+  <button class="carousel-arrow next" data-carousel-next type="button" aria-label="Next image"><span aria-hidden="true">›</span></button>
+  <span class="carousel-counter" data-carousel-counter role="status" aria-live="polite" aria-atomic="true" aria-label={`Image 1 of ${slides.length}`}>1 / {slides.length}</span>
+</div>
+
+<script>
+  for (const carousel of document.querySelectorAll<HTMLElement>("[data-social-carousel]")) {
+    const slides = [...carousel.querySelectorAll<HTMLAnchorElement>("[data-carousel-slide]")];
+    const counter = carousel.querySelector<HTMLElement>("[data-carousel-counter]");
+    let current = 0;
+    let gesture: { id: number; x: number; y: number } | null = null;
+    let suppressClickUntil = 0;
+
+    function show(index: number) {
+      const movingFocusedSlide = slides[current].contains(document.activeElement);
+      current = (index + slides.length) % slides.length;
+      const image = slides[current].querySelector<HTMLImageElement>("img");
+      if (image && !image.getAttribute("src")) image.src = image.dataset.src!;
+      slides.forEach((slide, slideIndex) => { slide.hidden = slideIndex !== current; });
+      if (movingFocusedSlide) carousel.focus({ preventScroll: true });
+      if (counter) {
+        counter.textContent = `${current + 1} / ${slides.length}`;
+        counter.setAttribute("aria-label", `Image ${current + 1} of ${slides.length}`);
+      }
+    }
+
+    carousel.querySelector("[data-carousel-previous]")?.addEventListener("click", () => show(current - 1));
+    carousel.querySelector("[data-carousel-next]")?.addEventListener("click", () => show(current + 1));
+    carousel.addEventListener("keydown", event => {
+      const destinations: Record<string, number> = { ArrowLeft: current - 1, ArrowRight: current + 1, Home: 0, End: slides.length - 1 };
+      if (Object.hasOwn(destinations, event.key)) {
+        event.preventDefault();
+        show(destinations[event.key]);
+      }
+    });
+    carousel.addEventListener("pointerdown", event => {
+      suppressClickUntil = 0;
+      if (event.pointerType === "mouse" || !event.isPrimary || (event.target as Element).closest("button")) return;
+      gesture = { id: event.pointerId, x: event.clientX, y: event.clientY };
+    });
+    carousel.addEventListener("pointerup", event => {
+      if (!gesture || gesture.id !== event.pointerId) return;
+      const dx = event.clientX - gesture.x;
+      const dy = event.clientY - gesture.y;
+      gesture = null;
+      if (Math.abs(dx) >= 40 && Math.abs(dx) > Math.abs(dy) * 1.25) {
+        suppressClickUntil = performance.now() + 500;
+        show(current + (dx < 0 ? 1 : -1));
+      }
+    });
+    carousel.addEventListener("pointercancel", () => { gesture = null; });
+    carousel.addEventListener("click", event => {
+      if (performance.now() < suppressClickUntil && (event.target as Element).closest("[data-carousel-slide]")) {
+        event.preventDefault();
+        event.stopPropagation();
+        suppressClickUntil = 0;
+      }
+    }, true);
+  }
+</script>
+
+<style>
+  .social-carousel{position:relative;width:100%;height:100%;touch-action:pan-y pinch-zoom}
+  .carousel-slide,.carousel-slide img{display:block;width:100%;height:100%;object-fit:cover}
+  .carousel-slide[hidden]{display:none!important}
+  .carousel-arrow{position:absolute;top:50%;z-index:1;display:grid;place-items:center;width:44px;height:44px;padding:0;border:0;border-radius:50%;background:transparent;color:#fff;cursor:pointer;transform:translateY(-50%);touch-action:manipulation}
+  .previous{left:4px}.next{right:4px}
+  .carousel-arrow span{display:grid;place-items:center;width:32px;height:32px;border:1px solid rgba(255,255,255,.5);border-radius:50%;background:rgba(0,0,0,.65);font-family:Arial,sans-serif;font-size:28px;line-height:1;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+  .carousel-counter{position:absolute;left:10px;top:10px;pointer-events:none;padding:4px 8px;border-radius:999px;background:rgba(0,0,0,.65);color:#fff;font-size:.68rem;font-weight:750;font-variant-numeric:tabular-nums}
+  .carousel-arrow:active span{background:rgba(0,0,0,.9)}
+  .social-carousel:focus-visible,.carousel-slide:focus-visible{outline:3px solid #f4c84a;outline-offset:-3px}
+  .carousel-arrow:focus-visible{outline:none}.carousel-arrow:focus-visible span{outline:3px solid #f4c84a;outline-offset:2px}
+  @media(hover:hover) and (pointer:fine){.carousel-arrow:hover span{background:rgba(0,0,0,.9)}}
+</style>

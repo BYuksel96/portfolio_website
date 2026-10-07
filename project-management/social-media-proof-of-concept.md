@@ -1,0 +1,27 @@
+# Selected social media proof of concept
+
+Approved direction (7 October 2026): manually supply post URLs in one JSON file per portfolio page. Extract available public media and metadata during a refresh command, save local media, and render photos/videos in the existing cards without platform embeds. Video cards may expand to the media's aspect ratio during playback.
+
+Samples: Instagram `DbyTDW2BAdX` for Eyebrow Tattooing; TikTok `7606435375598406943` for Dance.
+
+Implementation sequence:
+- [x] Add tested public-response parsers, caption normalization, URL validation, and local cache refresh with failure preservation.
+- [x] Add four page JSON files; fetch the two supplied posts and cache their media.
+- [x] Connect the catalog, home previews, search, and reusable native photo/video cards. Show actual post counts rather than repeat real posts to fill nine slots.
+- [x] Verify parser/cache tests, Astro checks/build, and desktop/mobile playback and navigation.
+
+Constraints: no credentials, platform embeds, third-party downloader dependencies, or live network requirement during a site build. Only the supplied public URLs are fetched. Limit each page to nine unique posts, sort dated posts newest first, separate hashtags, and keep the last successful cache on failure. CDN addresses are transient and never become the site's permanent media sources. The public HTML structures are unsupported and may require parser maintenance. No automatic latest-nine discovery.
+
+The proof of concept is implemented in the existing workspace for local review; no commit, push, or deployment is requested.
+
+Verification: 74 unit tests and 21 Playwright tests passed, including native playback, expansion, closing, navigation, caption/hashtag separation, and no platform frames or requests on desktop, mobile, and reduced-motion configurations. Astro check reported zero errors, warnings, or hints; the production build generated seven pages and included the cached assets.
+
+Read-only code review corrections were verified with regression tests: preserve existing cached assets through reuse/atomic replacement, deduplicate alternate URLs for the same post, recover Instagram captions from available page metadata, and close the active player with Escape even after focus moves to its original-post link. Partial metadata refreshes also preserve a previously known publication date.
+
+Three-post brow trial (8 October 2026): added DbrAuCTymDd at 02 and Db3z4tzAZTh at 03, retaining DbyTDW2BAdX at 01. The page uses `order: "listed"` because this explicitly requested arrangement differs from chronological order; real dates are unchanged. Reel 02 is copyright-blocked in Instagram's public response, so only its supplied preview image is downloaded, with a "Watch reel on Instagram" link. Card 03 uses the photo post's first image. The refresh saved all three entries successfully. Verification passed: 77 unit tests, 27 browser tests across desktop/mobile/reduced motion, Astro check with zero diagnostics, and the seven-page production build. The close-button geometry test now captures related rectangles in one layout read, avoiding mismatched before/after playback-scroll measurements.
+
+Nine-post expansion and image carousel (8 October 2026): approved controls are implemented in `PortfolioCarousel.astro`: previous/next arrows, wrapping, counter, left/right keyboard navigation (plus Home/End), and touch swiping that does not open the source link. Post 03 saves all ten slides, validates local image paths, and loads additional images only on selection. The importer commits carousel metadata only after every slide is saved; regression tests verify that a failed later download preserves the entire previous post cache. Posts 04–09 were added in the supplied bullet order, with all nine refreshes successful. Posts 01 and 05–09 have verified native video playback. Public embed responses flag both 02 and 04 as copyright-blocked and contain no playable video URL; normal public pages also expose no video metadata. Those two remain clearly labelled preview images and need client video files or available playable sources for native playback. The pasted embed snippets contain only links/markup and a loading script, not video files.
+
+Final verification: 84 unit tests and 33 browser tests passed (desktop, mobile, reduced motion), including all ten carousel images, real mobile swipe events, focused-link keyboard navigation, 01–09 numbering/order, preview badges, and playback of every new playable reel. Astro check reported zero errors/warnings/hints; seven-page production build passed. Visual review corrected an inherited `featured-media > span` rule that initially stretched the preview badge; badges now use a paragraph and have tested compact bounds. New cached media collection totals about 62 MB across 26 files. Changes remain local and uncommitted.
+
+Read-only review identified that file signatures alone accepted corrupt images. Regression tests reproduced signature-only JPEG/PNG and a truncated JPEG replacing a valid cache. The importer now fully decodes every image using Sharp with strict warnings and a 40-million-pixel bound before saving it; all three corrupt-later-slide cases preserve the entire previous post cache. Sharp was already installed through Astro and is now declared directly in package.json; the lockfile was synchronized offline with no package-version changes. All 19 existing cached images passed the same decoder validation. Full tests/check/build were rerun after this correction.

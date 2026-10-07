@@ -6,7 +6,7 @@ Use this file as the token-light memory layer for future Codex/Claude sessions.
 - Build: Astro static portfolio site at repo root.
 - Visual concept: iOS desktop/folder-inspired creator portfolio.
 - MVP folders: Photography, Videography, Dance, Eyebrow Tattooing.
-- Content strategy: curated local placeholders first; live social feeds later.
+- Content strategy: one JSON per portfolio page with manually selected public social post URLs; a refresh command saves extracted media/metadata locally. Brows has nine selected posts and Dance one; remaining pages retain placeholders.
 - Hosting default: Vercel.
 
 ## Epic Status
@@ -31,9 +31,12 @@ Use this file as the token-light memory layer for future Codex/Claude sessions.
 - EPIC-18 Responsive Hero Collision Guardrails: In review, not committed. Added narrow desktop, low-height desktop, tablet, mobile, and short-phone layout rules to keep folders away from creator title/search/AirDrop UI; mobile shell now fits viewport with equal gutters, foreground stacking is restored, and folders are raised toward the search-to-bottom midpoint.
 
 ## Future Notes
+- Nine-post brow trial and carousel (8 October 2026): added posts 04–09 in the user's bullet order, preserving `order: "listed"`. Post 03 now caches all ten image slides and renders `PortfolioCarousel.astro` with arrows, counter, wrapping, keyboard navigation, Home/End, and real touch swiping. Additional slides load only on selection; failed later slide downloads retain the whole previous post cache. Images now undergo full Sharp decoding with strict warnings and a 40-million-pixel bound; corrupt later slides also preserve the previous cache. Sharp is a direct dependency, already present through Astro. Posts 01 and 05–09 play natively; Instagram marks 02 and 04 copyright-blocked and omits their video URLs, so they remain visibly labelled previews. Pasted embed markup has links and a loader, not a video asset. Native playback for restricted posts needs playable sources/original client files. Verified 84 unit tests, 33 Playwright tests, all 19 cached images decoded, zero Astro diagnostics, and a seven-page build; cached media totals about 62 MB. No credentials, commits, push, or deployment.
+- Brow three-post trial (8 October 2026): preserve requested 01 DbyTDW2BAdX, 02 DbrAuCTymDd, 03 Db3z4tzAZTh with top-level `order: "listed"`. Dates remain actual (7, 5, and 10 August 2026); omit this setting for normal newest-first sorting. Instagram marks reel 02 copyright-blocked, so only its publicly supplied preview image is cached (`previewOnly: true`) with a "Watch reel on Instagram" link; blocked playback is not bypassed.
+- Social media proof of concept (7 October 2026): `npm run content:refresh` reads `src/data/social/*.json`, saves native videos/photos/posters under `public/assets/social/`, and keeps prior entries on a failed refresh. Instagram sample DbyTDW2BAdX is on Eyebrow Tattooing; TikTok sample 7606435375598406943 is on Dance. No platform embeds or cookie notices on the site. Native players expand, collapse, and pause on navigation. Unsupported page parsers may need maintenance; URL selection remains manual. Track progress in `project-management/social-media-proof-of-concept.md`.
 - Replace placeholder identity, email, social URLs, and media before launch.
 - Instagram live feed requires Creator/Business account and current Meta API verification.
-- TikTok can be upgraded with official embeds for supplied post URLs.
+- Selected TikTok and Instagram URLs now use locally saved media; official embeds were unsuitable for the required appearance.
 - Future booking default is a Cal.com embed on a dedicated eyebrow tattooing booking page.
 - Keep `package.json` overrides for `volar-service-yaml` and `yaml-language-server` until the upstream Astro checker chain no longer needs them and audit remains clean.
 - `web_design/` is ignored intentionally because it contains third-party/client-provided inspiration screenshots, not deployable site assets.

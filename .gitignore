@@ -9,6 +9,8 @@ node_modules/
 !.env.example
 npm-debug.log*
 test-results/
+public/assets/social/*.tmp
+src/data/social/*.json.tmp
 
 # Local visual references only. Do not publish third-party inspiration screenshots.
 web_design/

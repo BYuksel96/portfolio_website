@@ -38,9 +38,41 @@ test("search finds folders from descriptive metadata and matching post details",
   const night = searchPortfolio("handheld texture");
 
   assert.deepEqual(consultation.map((result) => result.folder.slug), ["eyebrow-tattooing"]);
-  assert.equal(consultation[0].posts[0].title, "Brow Mapping Preview");
+  assert.equal(consultation[0].folder.title, "Eyebrow Tattooing");
   assert.deepEqual(night.map((result) => result.folder.slug), ["videography"]);
   assert.equal(night[0].posts[0].title, "Night Edit Reel");
+});
+
+test("selected social posts replace repeated placeholders and are searchable by caption and hashtag", () => {
+  const dance = getFolderBySlug("dance");
+  assert.equal(dance.latestMedia.length, 1);
+  assert.equal(dance.posts[0].title, "The rare front view @leicamrv");
+  assert.equal(dance.posts[0].date, "13 February 2026");
+  assert.equal(dance.posts[0].mediaType, "video");
+  assert.match(dance.posts[0].posterUrl, /^\/assets\/social\//);
+  assert.equal(searchPortfolio("rare front")[0].folder.slug, "dance");
+  assert.equal(searchPortfolio("danceclass")[0].posts[0].permalink, "https://www.tiktok.com/@geyonceynowles/video/7606435375598406943");
+});
+
+test("brow trial displays nine unique selected posts in the requested grid order", () => {
+  const brows = getFolderBySlug("eyebrow-tattooing");
+  assert.deepEqual(brows.latestMedia.map(post => post.permalink), [
+    "https://www.instagram.com/reel/DbyTDW2BAdX/",
+    "https://www.instagram.com/reel/DbrAuCTymDd/",
+    "https://www.instagram.com/p/Db3z4tzAZTh/",
+    "https://www.instagram.com/reel/DdCGtRYhnST/",
+    "https://www.instagram.com/reel/Dc-C5iuBUN0/",
+    "https://www.instagram.com/reel/DcfQbPBBwac/",
+    "https://www.instagram.com/reel/DcZ2JYopJ2j/",
+    "https://www.instagram.com/reel/DcSWuWRBaL3/",
+    "https://www.instagram.com/reel/DcVDH0YBcdy/"
+  ]);
+  for (const post of brows.latestMedia) {
+    assert.match(post.mediaUrl, /^\/assets\/social\//);
+    assert.ok(post.publishedAt);
+    assert.ok(post.title && !post.title.includes("#"));
+  }
+  assert.equal(brows.latestMedia[2].slides?.length, 10);
 });
 
 test("search normalizes whitespace and returns all folders for an empty query", () => {

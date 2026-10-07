@@ -2,6 +2,7 @@
 // @ts-nocheck
 import { heroLandscapes, profile } from "../data/site.js";
 import { portfolioContacts, portfolioFolders } from "../lib/portfolio-catalog.js";
+import PortfolioCard from "./PortfolioCard.astro";
 const { initialView = "home" } = Astro.props;
 const isHome = initialView === "home";
 const icons = {
@@ -36,7 +37,7 @@ const letters = (value) => [...value];
       <nav class="scattered-folders" aria-label="Portfolio folders">
         {portfolioFolders.map((folder, index) => (
           <button type="button" class={`scattered-folder folder-${folder.color}`} data-view={folder.slug} style={`--accent:${folder.accent};--folder-index:${index}`}>
-            <span class="folder-stack" aria-hidden="true"><span class="folder-back"></span><span class="folder-previews">{folder.posts.map((post, postIndex) => <span class={`folder-polaroid preview-${postIndex + 1}`}><img src={post.mediaUrl} alt="" /></span>)}</span><span class="folder-front"></span></span>
+            <span class="folder-stack" aria-hidden="true"><span class="folder-back"></span><span class="folder-previews">{folder.posts.slice(0, 3).map((post, postIndex) => <span class={`folder-polaroid preview-${postIndex + 1}`}><img src={post.posterUrl || post.mediaUrl} alt="" /></span>)}</span><span class="folder-front"></span></span>
             <span>{folder.title}</span>
           </button>
         ))}
@@ -63,8 +64,8 @@ const letters = (value) => [...value];
           <section class={`portfolio-view view-${folder.color}`} data-panel={folder.slug} style={`--accent:${folder.accent}`} hidden={initialView !== folder.slug}>
             <header class="view-header"><div><p class="view-kicker">Open folder / {folder.title}</p><h2 tabindex="-1" data-monitor-heading>{folder.title}</h2><p>{folder.description}</p></div><a class="social-link" href={folder.social.url} target="_blank" rel="noreferrer">Visit {folder.social.label} ↗</a></header>
             <div class="tag-row" aria-label={`${folder.title} disciplines`}>{folder.tags.map((tag) => <span>{tag}</span>)}</div>
-            <section class="latest-preview" aria-label={`${folder.title} latest preview`}><div class="section-label"><span>Latest Preview</span><span>09 files · 3 × 3</span></div>
-              <div class="featured-grid preview-grid">{folder.latestMedia.map((media, index) => <article class="featured-card"><div class="featured-media" style={`--c1:${media.palette[0]};--c2:${media.palette[1]};--c3:${media.palette[2]}`}><img src={media.mediaUrl} alt={media.alt} loading="lazy" /><span>{String(index + 1).padStart(2, "0")}</span></div><div class="featured-copy"><p>{media.type} · {media.date}</p><h3>{media.title}</h3><p>{media.description}</p></div></article>)}</div>
+            <section class="latest-preview" aria-label={`${folder.title} latest preview`}><div class="section-label"><span>Latest Preview</span><span>{String(folder.latestMedia.length).padStart(2, "0")} {folder.latestMedia.length === 1 ? "file" : "files"}{folder.latestMedia.length === 9 ? " · 3 × 3" : ""}</span></div>
+              <div class="featured-grid preview-grid">{folder.latestMedia.map((media, index) => <PortfolioCard media={media} index={index} />)}</div>
             </section>
           </section>
         ))}
@@ -141,6 +142,7 @@ const letters = (value) => [...value];
   const pathFor = (view, query = "") => view === "home" ? "/" : view === "search" && query ? `/search?q=${encodeURIComponent(query)}` : `/${view}`;
 
   function render(view, focus = false) {
+    document.dispatchEvent(new CustomEvent("portfolio:view-changed", { detail: { view } }));
     clearControlAnimations();
     app.removeAttribute("aria-busy");
     activeView = view;

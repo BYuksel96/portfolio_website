@@ -1,4 +1,11 @@
 import { folders, profile, socialNotes } from "../data/site.js";
+import brows from "../data/social/eyebrow-tattooing.json" with { type: "json" };
+import videography from "../data/social/videography.json" with { type: "json" };
+import photography from "../data/social/photography.json" with { type: "json" };
+import dance from "../data/social/dance.json" with { type: "json" };
+import { normalizeSocialPosts } from "./social-content.js";
+
+const socialPages = { "eyebrow-tattooing": brows, videography, photography, dance };
 
 export const HOME_VIEW = "home";
 export const SEARCH_VIEW = "search";
@@ -20,17 +27,18 @@ function normalizeSearchTerm(value) {
     .replace(/\s+/g, " ");
 }
 
-function makeLatestMedia(posts) {
-  return Array.from({ length: 9 }, (_, index) => {
+function makeLatestMedia(posts, selected = false) {
+  return Array.from({ length: selected ? posts.length : 9 }, (_, index) => {
     const post = posts[index % posts.length];
 
     return {
+      ...post,
       title: post.title,
       type: post.type,
       date: post.date,
       description: post.description,
-      id: `${post.title.toLocaleLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")}-${index + 1}`,
-      alt: `${post.title} — latest work ${index + 1}`,
+      id: post.id ?? `${post.title.toLocaleLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")}-${index + 1}`,
+      alt: post.alt ?? `${post.title} — latest work ${index + 1}`,
       mediaUrl: post.mediaUrl,
       palette: post.palette
     };
@@ -39,7 +47,11 @@ function makeLatestMedia(posts) {
 
 function toFolderCatalogEntry(folder) {
   const slug = sourceIdToSlug[folder.id];
-  const posts = folder.posts.map((post) => ({ ...post, tags: [...post.tags], palette: [...post.palette] }));
+  const socialData = socialPages[slug];
+  const selected = normalizeSocialPosts(socialData);
+  const posts = selected.length
+    ? selected.map(post => ({ ...post, palette: [folder.accent, "#f6f6f2", "#222222"] }))
+    : folder.posts.map((post) => ({ ...post, tags: [...post.tags], palette: [...post.palette] }));
 
   return {
     slug,
@@ -51,11 +63,11 @@ function toFolderCatalogEntry(folder) {
     cta: folder.cta,
     social: {
       label: folder.socialLabel,
-      url: folder.socialUrl
+      url: socialData.accountUrl || folder.socialUrl
     },
     tags: [...folder.tags],
     posts,
-    latestMedia: makeLatestMedia(posts)
+    latestMedia: makeLatestMedia(posts, selected.length > 0)
   };
 }
 
