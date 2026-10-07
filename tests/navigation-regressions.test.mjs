@@ -33,3 +33,9 @@ test("Home search relies on URL-synchronized render without a stale delayed quer
 test("returning Home animates above the outgoing workspace", () => {
   assert.match(source, /\.is-returning-home\s+\.home-scene\{[^}]*z-index:\s*9/);
 });
+
+test("the outgoing workspace becomes hidden immediately when Home renders", () => {
+  const workspaceRule = source.match(/\.workspace\{[^}]*\}/)?.[0] || "";
+  assert.match(source, /\.is-home\s+\.workspace\{visibility:\s*hidden\}/);
+  assert.match(workspaceRule, /transition:\s*opacity\s+\.35s\s+ease,\s*transform\s+\.35s\s+ease/);
+});
