@@ -1,0 +1,36 @@
+<div class="featured-grid preview-grid" data-portfolio-grid><slot /></div>
+
+<script>
+  for (const grid of document.querySelectorAll<HTMLElement>("[data-portfolio-grid]")) {
+    const cards = [...grid.querySelectorAll<HTMLElement>(":scope > .featured-card")];
+    let frame = 0;
+    function layout() {
+      frame = 0;
+      if (!grid.getBoundingClientRect().width) return;
+      const columns = Number(getComputedStyle(grid).getPropertyValue("--portfolio-columns"));
+      const nextRows = Array<number>(columns).fill(1);
+      // Explicit placement preserves row-major source and keyboard order while
+      // letting each column stack independently; no cards are moved in the DOM.
+      const heights = cards.map(card => Math.ceil(card.getBoundingClientRect().height));
+      grid.dataset.masonryReady = "";
+      cards.forEach((card, index) => {
+        const column = index % columns;
+        const placement = `${nextRows[column]} / span ${heights[index]}`;
+        if (card.style.gridColumn !== String(column + 1)) card.style.gridColumn = String(column + 1);
+        if (card.style.gridRow !== placement) card.style.gridRow = placement;
+        nextRows[column] += heights[index] + 14;
+      });
+    }
+    const schedule = () => { if (!frame) frame = requestAnimationFrame(layout); };
+    const observer = new ResizeObserver(schedule);
+    observer.observe(grid);
+    cards.forEach(card => observer.observe(card));
+    schedule();
+  }
+</script>
+
+<style>
+  .featured-grid{--portfolio-columns:3;align-items:start}
+  .featured-grid[data-masonry-ready]{grid-auto-rows:1px;row-gap:0}
+  @media(max-width:720px){.featured-grid{--portfolio-columns:1}}
+</style>

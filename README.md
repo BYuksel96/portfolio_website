@@ -4,6 +4,8 @@ This is a fast, static Astro website for a creative person who works across phot
 
 The design direction is an iOS-style desktop with folders. Each folder represents a creative discipline and opens into curated work, tags, social links, and contact prompts.
 
+The split-flap scenery is shown only on Home. Folder cards use three independently stacked masonry columns with consistent gaps; mobile uses one column. Their numbering and keyboard order stay unchanged, and the layout adjusts when videos expand or captions change.
+
 ## Why Astro
 
 Astro was chosen because this site should be fast, easy to host, and mostly static. It sends very little JavaScript by default, which is useful for a portfolio that may later include heavier social embeds from TikTok or Instagram.
@@ -131,6 +133,8 @@ npm.cmd run content:refresh -- --page dance
 The command reads the public pages, extracts available caption/date/media, downloads the media and poster into `public/assets/social/`, and writes a generated `cached` block into each JSON entry. It uses no account credentials. TikTok's temporary anonymous session cookies stay in memory during the download; no cookie or signed CDN address is saved. HTML challenges, unsupported hosts, oversized downloads, and invalid media files are rejected. A failed post refresh retains that entry's previous saved content and returns a nonzero exit status.
 
 The website uses these local files, so building and viewing saved posts needs no connection to the social platforms. Commit the JSON files and saved media together when publishing. Images link to their original post; video cards use native playback, expand to show the video, and stop when navigating away. Videos load only when played. Captions and dates are displayed in our own markup, with hashtags extracted into the final paragraph. Dated posts sort newest first, with `01` as the newest selected post; missing dates appear last.
+
+Captions longer than 240 characters show a word-boundary preview of roughly half the text, capped at 240 characters and ending in `...`. Playing a video (via its image or caption) reveals the full caption; closing, playback failure, or navigation restores the preview. Image and restricted-video captions link to the original post instead. Full saved captions remain available to search.
 
 Image carousels save all slides in a generated `cached.slides` array (up to 20 images supported). Cards provide previous/next arrows, an image counter, left/right keyboard navigation, Home/End keys, and touch swiping; cycling wraps at either end. Only the first image loads initially, and other images load as selected. Clicking a slide still opens the original post. All slide downloads and full image decoding must succeed before that post's cache is replaced. Sharp (already used by Astro, now also a direct dependency) rejects corrupt/truncated images and images above 40 million pixels. Mixed image/video carousels are not currently supported.
 

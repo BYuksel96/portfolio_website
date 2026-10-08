@@ -3,6 +3,7 @@
 import { heroLandscapes, profile } from "../data/site.js";
 import { portfolioContacts, portfolioFolders } from "../lib/portfolio-catalog.js";
 import PortfolioCard from "./PortfolioCard.astro";
+import PortfolioGrid from "./PortfolioGrid.astro";
 const { initialView = "home" } = Astro.props;
 const isHome = initialView === "home";
 const icons = {
@@ -64,8 +65,8 @@ const letters = (value) => [...value];
           <section class={`portfolio-view view-${folder.color}`} data-panel={folder.slug} style={`--accent:${folder.accent}`} hidden={initialView !== folder.slug}>
             <header class="view-header"><div><p class="view-kicker">Open folder / {folder.title}</p><h2 tabindex="-1" data-monitor-heading>{folder.title}</h2><p>{folder.description}</p></div><a class="social-link" href={folder.social.url} target="_blank" rel="noreferrer">Visit {folder.social.label} ↗</a></header>
             <div class="tag-row" aria-label={`${folder.title} disciplines`}>{folder.tags.map((tag) => <span>{tag}</span>)}</div>
-            <section class="latest-preview" aria-label={`${folder.title} latest preview`}><div class="section-label"><span>Latest Preview</span><span>{String(folder.latestMedia.length).padStart(2, "0")} {folder.latestMedia.length === 1 ? "file" : "files"}{folder.latestMedia.length === 9 ? " · 3 × 3" : ""}</span></div>
-              <div class="featured-grid preview-grid">{folder.latestMedia.map((media, index) => <PortfolioCard media={media} index={index} />)}</div>
+            <section class="latest-preview" aria-label={`${folder.title} latest preview`}><div class="section-label"><span>Latest Preview</span><span>{String(folder.latestMedia.length).padStart(2, "0")} {folder.latestMedia.length === 1 ? "file" : "files"}</span></div>
+              <PortfolioGrid>{folder.latestMedia.map((media, index) => <PortfolioCard media={media} index={index} />)}</PortfolioGrid>
             </section>
           </section>
         ))}
@@ -227,6 +228,7 @@ const letters = (value) => [...value];
   .monitor-stage{height:100svh;padding:clamp(6px,1.4vw,22px);overflow:hidden;background:radial-gradient(circle at 15% 20%,#d5eff5,transparent 26%),radial-gradient(circle at 84% 15%,#fff0c4,transparent 30%),#dfe7e3}
   .monitor-app{position:relative;height:100%;min-height:0;overflow:hidden;border:1px solid rgba(255,255,255,.8);border-radius:clamp(18px,2vw,30px);background:rgba(255,255,255,.2);box-shadow:0 24px 80px rgba(17,22,20,.2);isolation:isolate}
   .split-flap-board{position:absolute;inset:0;z-index:-2;display:grid;grid-template-columns:repeat(24,1fr);overflow:hidden;opacity:.44;perspective:1200px}
+  .is-workspace .split-flap-board{display:none}
   .split-flap-board:after{position:absolute;inset:0;content:"";background:linear-gradient(90deg,rgba(255,255,255,.7),rgba(255,255,255,.2) 45%,rgba(255,255,255,.55)),repeating-linear-gradient(90deg,transparent 0,transparent calc(100%/24 - 1px),#fff calc(100%/24 - 1px),#fff calc(100%/24));pointer-events:none}
   .split-flap-tile,.split-flap-card,.split-flap-face{position:relative;display:block;height:100%}.split-flap-card,.split-flap-face{position:absolute;inset:0}.split-flap-card{transform-style:preserve-3d;transition:transform .76s cubic-bezier(.32,.02,.2,1)}.split-flap-face{background-repeat:no-repeat;backface-visibility:hidden}.split-flap-face-back{transform:rotateY(180deg)}.split-flap-tile.is-flipping .split-flap-card{transform:rotateY(180deg)}.split-flap-tile.is-resetting .split-flap-card{transition:none}
   .monitor-bar{position:absolute;inset:0 0 auto;z-index:20;display:flex;justify-content:space-between;padding:12px 18px;color:#292d2b;font-size:.72rem;font-weight:800}.window-dots{display:flex;gap:6px}.window-dots i{width:10px;height:10px;border-radius:50%;background:#252827}
