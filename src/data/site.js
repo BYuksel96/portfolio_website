@@ -1,7 +1,6 @@
 export const profile = {
   name: "Creator Name",
   handle: "@creatorhandle",
-  location: "London, UK",
   headline: "Creative direction, movement, image-making, and beauty work.",
   intro:
     "A portfolio for a multi-discipline creator working across photography, video edits, street dance, social content, and eyebrow tattooing.",

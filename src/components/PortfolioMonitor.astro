@@ -1,6 +1,6 @@
 ---
 // @ts-nocheck
-import { heroLandscapes, profile } from "../data/site.js";
+import { heroLandscapes } from "../data/site.js";
 import { portfolioContacts, portfolioFolders } from "../lib/portfolio-catalog.js";
 import PortfolioCard from "./PortfolioCard.astro";
 import PortfolioGrid from "./PortfolioGrid.astro";
@@ -21,7 +21,8 @@ const letters = (value) => [...value];
     <header class="monitor-bar" aria-label="Portfolio status">
       <button class="monitor-minimize" type="button" data-minimize-monitor aria-label="Minimize portfolio and open game">
         <span aria-hidden="true"></span>
-      </button><span>{profile.location}</span><span>Portfolio OS</span>
+      </button>
+      <span class="monitor-location" data-viewer-location>Your location</span>
     </header>
 
     <section class="home-scene" data-home-scene aria-hidden={!isHome} aria-labelledby="page-title">
@@ -90,8 +91,13 @@ const letters = (value) => [...value];
 
 <script>
   // @ts-nocheck
+  import { lookupViewerLocation } from "../lib/viewer-location.js";
   const app = document.querySelector("[data-monitor-app]");
   if (!(app instanceof HTMLElement)) throw new Error("Portfolio monitor failed to initialise");
+  const viewerLocation = app.querySelector("[data-viewer-location]");
+  lookupViewerLocation().then((location) => {
+    if (location && viewerLocation instanceof HTMLElement) viewerLocation.textContent = location;
+  });
   const validViews = new Set(["home", "eyebrow-tattooing", "videography", "photography", "dance", "search", "contacts"]);
   const panels = [...app.querySelectorAll("[data-panel]")];
   const controls = [...app.querySelectorAll("[data-view]")];
@@ -232,6 +238,9 @@ const letters = (value) => [...value];
   .split-flap-board:after{position:absolute;inset:0;content:"";background:linear-gradient(90deg,rgba(255,255,255,.7),rgba(255,255,255,.2) 45%,rgba(255,255,255,.55)),repeating-linear-gradient(90deg,transparent 0,transparent calc(100%/24 - 1px),#fff calc(100%/24 - 1px),#fff calc(100%/24));pointer-events:none}
   .split-flap-tile,.split-flap-card,.split-flap-face{position:relative;display:block;height:100%}.split-flap-card,.split-flap-face{position:absolute;inset:0}.split-flap-card{transform-style:preserve-3d;transition:transform .76s cubic-bezier(.32,.02,.2,1)}.split-flap-face{background-repeat:no-repeat;backface-visibility:hidden}.split-flap-face-back{transform:rotateY(180deg)}.split-flap-tile.is-flipping .split-flap-card{transform:rotateY(180deg)}.split-flap-tile.is-resetting .split-flap-card{transition:none}
   .monitor-bar{position:absolute;inset:0 0 auto;z-index:20;display:flex;justify-content:space-between;padding:12px 18px;color:#292d2b;font-size:.72rem;font-weight:800}.window-dots{display:flex;gap:6px}.window-dots i{width:10px;height:10px;border-radius:50%;background:#252827}
+  .monitor-bar{align-items:center;min-height:42px}
+  .monitor-location{position:absolute;left:50%;max-width:calc(100% - 185px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transform:translateX(-50%)}
+  @media(max-width:480px){.monitor-location{max-width:calc(100% - 130px);font-size:.65rem}}
   .home-scene{position:absolute;inset:0;transition:opacity .24s ease}.is-workspace .home-scene{opacity:0;visibility:hidden;pointer-events:none}.is-returning-home .home-scene{opacity:1;visibility:visible;pointer-events:none}.hero-copy{position:absolute;z-index:3;left:clamp(28px,5vw,92px);top:clamp(100px,17vh,180px);width:min(44vw,690px)}.eyebrow{margin:0 0 12px;color:#505653;font-size:.72rem;font-weight:850;text-transform:uppercase}.hero-copy h1{margin:0;color:#fff;font-size:clamp(5rem,9vw,10rem);line-height:.84;letter-spacing:-.07em;text-shadow:0 12px 38px rgba(0,0,0,.22)}.hero-copy>p:last-child{max-width:450px;margin:22px 0 0;font-size:clamp(.95rem,1.15vw,1.2rem);font-weight:650;line-height:1.45}.crumble-word{display:inline-block;white-space:nowrap}.crumble-word:not(:last-child){margin-right:.16em}.crumble-char{display:inline-block;white-space:pre}.is-leaving-home .crumble-char{animation:crumble .55s cubic-bezier(.55,.04,.95,.35) both;animation-delay:calc(var(--i)*9ms)}.is-returning-home .crumble-char{animation:restore .5s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i)*7ms)}
   .is-returning-home .home-scene{z-index:9}
   .home-search{position:absolute;z-index:5;top:13%;left:50%;display:flex;align-items:center;gap:10px;width:min(390px,31vw);min-height:52px;padding:8px 16px;border:2px solid #181818;border-radius:999px;background:#fff;transform:translateX(-50%);box-shadow:0 12px 26px rgba(0,0,0,.12);transition:.5s cubic-bezier(.2,.8,.2,1)}.home-search svg,.workspace-search svg,.dock-icon svg{width:22px;fill:currentColor}.home-search input,.workspace-search input{width:100%;border:0;outline:0;background:transparent}

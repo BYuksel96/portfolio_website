@@ -6,6 +6,8 @@ The design direction is an iOS-style desktop with folders. Each folder represent
 
 The split-flap scenery is shown only on Home. Folder cards use three independently stacked masonry columns with consistent gaps; mobile uses one column. Their numbering and keyboard order stay unchanged, and the layout adjusts when videos expand or captions change.
 
+The top bar uses an approximate IP-based city and country lookup from `ipwho.is` in the visitor's browser. This sends the visitor's IP address to that service; it does not request precise device location. If the lookup is unavailable, the bar shows “Your location”.
+
 ## Why Astro
 
 Astro was chosen because this site should be fast, easy to host, and mostly static. It sends very little JavaScript by default, which is useful for a portfolio that may later include heavier social embeds from TikTok or Instagram.
